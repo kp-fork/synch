@@ -14,6 +14,7 @@ import {
 	commitMutation,
 	listDeletedEntries,
 	listEntryVersions,
+	purgeDeletedEntries,
 	restoreEntryVersion,
 	uploadBlob,
 } from "./helpers";
@@ -327,6 +328,288 @@ describe("sync durable object entry history integration", () => {
 			},
 		);
 		expect(deleted.status).toBe(404);
+	});
+
+	it("purges deleted entry history and immediately reclaims unpinned blob storage", async () => {
+		const primary = await signUpAndCreateVault();
+		const token = await issueSyncToken(
+			primary.sessionCookie,
+			primary.vaultId,
+			"local-vault-purge-history",
+		);
+		const stub = env.SYNC_COORDINATOR.getByName(primary.vaultId);
+		const session = {
+			userId: primary.userId,
+			localVaultId: "local-vault-purge-history",
+			vaultId: primary.vaultId,
+		};
+		const entryId = "entry-purge-history";
+		const blobId = uniqueId("blob-purge-history");
+
+		await uploadBlob(primary.vaultId, token.token, blobId, "purged body");
+		await commitMutation(stub, session, {
+			mutationId: "mutation-purge-history-create",
+			entryId,
+			op: "upsert",
+			baseRevision: 0,
+			blobId,
+			encryptedMetadata: "meta-create",
+		});
+		await commitMutation(stub, session, {
+			mutationId: "mutation-purge-history-delete",
+			entryId,
+			op: "delete",
+			baseRevision: 1,
+			blobId: null,
+			encryptedMetadata: "meta-delete",
+		});
+
+		const beforePurge = await runInDurableObject(stub, async (_instance, state) => {
+			const storage = state.storage.sql
+				.exec<{ storage_used_bytes: number }>(
+					"SELECT storage_used_bytes FROM coordinator_state WHERE id = 1",
+				)
+				.toArray()[0];
+			return Number(storage?.storage_used_bytes ?? 0);
+		});
+		expect(beforePurge).toBeGreaterThan(0);
+
+		const purged = await purgeDeletedEntries(stub, session, [
+			{ entryId, revision: 2 },
+		]);
+		expect(purged.message.results).toEqual([
+			{
+				status: "accepted",
+				entryId,
+			},
+		]);
+
+		const listed = await listDeletedEntries(stub, session, {
+			before: null,
+			limit: 25,
+		});
+		expect(listed.entries.map((entry) => entry.entryId)).not.toContain(entryId);
+
+		const afterPurge = await runInDurableObject(stub, async (_instance, state) => {
+			const storage = state.storage.sql
+				.exec<{ storage_used_bytes: number }>(
+					"SELECT storage_used_bytes FROM coordinator_state WHERE id = 1",
+				)
+				.toArray()[0];
+			const blob = state.storage.sql
+				.exec<{ blob_id: string }>(
+					"SELECT blob_id FROM blobs WHERE blob_id = ?",
+					blobId,
+				)
+				.toArray()[0];
+			const versions = state.storage.sql
+				.exec<{ count: number }>(
+					"SELECT count(*) AS count FROM entry_versions WHERE entry_id = ?",
+					entryId,
+				)
+				.toArray()[0];
+			const entry = state.storage.sql
+				.exec<{ deleted: number; revision: number }>(
+					"SELECT deleted, revision FROM entries WHERE entry_id = ?",
+					entryId,
+				)
+				.toArray()[0];
+			return {
+				storageUsedBytes: Number(storage?.storage_used_bytes ?? 0),
+				hasBlob: !!blob,
+				versionCount: Number(versions?.count ?? 0),
+				entry,
+			};
+		});
+		expect(afterPurge).toEqual({
+			storageUsedBytes: 0,
+			hasBlob: false,
+			versionCount: 0,
+			entry: {
+				deleted: 1,
+				revision: 2,
+			},
+		});
+
+		const deletedBlob = await apiRequest(
+			`/v1/vaults/${encodeURIComponent(primary.vaultId)}/blobs/${blobId}`,
+			{
+				headers: {
+					authorization: `Bearer ${token.token}`,
+				},
+			},
+		);
+		expect(deletedBlob.status).toBe(404);
+	});
+
+	it("does not delete purged history blobs that are still pinned by another version", async () => {
+		const primary = await signUpAndCreateVault();
+		const token = await issueSyncToken(
+			primary.sessionCookie,
+			primary.vaultId,
+			"local-vault-purge-shared-history",
+		);
+		const stub = env.SYNC_COORDINATOR.getByName(primary.vaultId);
+		const session = {
+			userId: primary.userId,
+			localVaultId: "local-vault-purge-shared-history",
+			vaultId: primary.vaultId,
+		};
+		const blobId = uniqueId("blob-purge-shared-history");
+
+		await uploadBlob(primary.vaultId, token.token, blobId, "shared body");
+		for (const entryId of ["entry-shared-a", "entry-shared-b"]) {
+			await commitMutation(stub, session, {
+				mutationId: `mutation-${entryId}-create`,
+				entryId,
+				op: "upsert",
+				baseRevision: 0,
+				blobId,
+				encryptedMetadata: `meta-create-${entryId}`,
+			});
+			await commitMutation(stub, session, {
+				mutationId: `mutation-${entryId}-delete`,
+				entryId,
+				op: "delete",
+				baseRevision: 1,
+				blobId: null,
+				encryptedMetadata: `meta-delete-${entryId}`,
+			});
+		}
+
+		const purged = await purgeDeletedEntries(stub, session, [
+			{ entryId: "entry-shared-a", revision: 2 },
+		]);
+		expect(purged.message.results).toEqual([
+			{
+				status: "accepted",
+				entryId: "entry-shared-a",
+			},
+		]);
+
+		const stillDownloadable = await apiRequest(
+			`/v1/vaults/${encodeURIComponent(primary.vaultId)}/blobs/${blobId}`,
+			{
+				headers: {
+					authorization: `Bearer ${token.token}`,
+				},
+			},
+		);
+		expect(stillDownloadable.status).toBe(200);
+
+		const state = await runInDurableObject(stub, async (_instance, storageState) => {
+			const versions = storageState.storage.sql
+				.exec<{ entry_id: string }>(
+					"SELECT entry_id FROM entry_versions WHERE blob_id = ? ORDER BY entry_id",
+					blobId,
+				)
+				.toArray()
+				.map((row) => row.entry_id);
+			const storage = storageState.storage.sql
+				.exec<{ storage_used_bytes: number }>(
+					"SELECT storage_used_bytes FROM coordinator_state WHERE id = 1",
+				)
+				.toArray()[0];
+			const blob = storageState.storage.sql
+				.exec<{ state: string }>(
+					"SELECT state FROM blobs WHERE blob_id = ?",
+					blobId,
+				)
+				.toArray()[0];
+			return {
+				versions,
+				storageUsedBytes: Number(storage?.storage_used_bytes ?? 0),
+				blobState: blob?.state ?? null,
+			};
+		});
+		expect(state.versions).toEqual(["entry-shared-b"]);
+		expect(state.storageUsedBytes).toBeGreaterThan(0);
+		expect(state.blobState).toBe("pending_delete");
+	});
+
+	it("returns per-entry failures when purging invalid deleted entries", async () => {
+		const primary = await signUpAndCreateVault();
+		const token = await issueSyncToken(
+			primary.sessionCookie,
+			primary.vaultId,
+			"local-vault-purge-failures",
+		);
+		const stub = env.SYNC_COORDINATOR.getByName(primary.vaultId);
+		const session = {
+			userId: primary.userId,
+			localVaultId: "local-vault-purge-failures",
+			vaultId: primary.vaultId,
+		};
+
+		const activeBlobId = uniqueId("blob-purge-active");
+		await uploadBlob(primary.vaultId, token.token, activeBlobId, "active body");
+		await commitMutation(stub, session, {
+			mutationId: "mutation-purge-active-create",
+			entryId: "entry-active",
+			op: "upsert",
+			baseRevision: 0,
+			blobId: activeBlobId,
+			encryptedMetadata: "meta-active",
+		});
+
+		await initializeCoordinatorState(primary.vaultId);
+		await runInDurableObject(stub, async (_instance, state) => {
+			state.storage.sql.exec(
+				`
+				INSERT INTO entries (
+					entry_id,
+					revision,
+					blob_id,
+					encrypted_metadata,
+					deleted,
+					updated_seq,
+					updated_at,
+					updated_by_user_id,
+					updated_by_local_vault_id
+				) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+				`,
+				"entry-no-history",
+				2,
+				null,
+				"meta-no-history",
+				1,
+				2,
+				Date.now(),
+				primary.userId,
+				"local-vault-purge-failures",
+			);
+		});
+
+		const purged = await purgeDeletedEntries(stub, session, [
+			{ entryId: "entry-missing", revision: 1 },
+			{ entryId: "entry-active", revision: 1 },
+			{ entryId: "entry-no-history", revision: 1 },
+			{ entryId: "entry-no-history", revision: 2 },
+		]);
+
+		expect(purged.message.results).toEqual([
+			expect.objectContaining({
+				status: "rejected",
+				entryId: "entry-missing",
+				code: "not_found",
+			}),
+			expect.objectContaining({
+				status: "rejected",
+				entryId: "entry-active",
+				code: "not_deleted",
+			}),
+			expect.objectContaining({
+				status: "rejected",
+				entryId: "entry-no-history",
+				code: "stale_revision",
+				expectedRevision: 2,
+			}),
+			expect.objectContaining({
+				status: "rejected",
+				entryId: "entry-no-history",
+				code: "no_history",
+			}),
+		]);
 	});
 
 	it("lists restorable deleted entries in retention-window pages", async () => {

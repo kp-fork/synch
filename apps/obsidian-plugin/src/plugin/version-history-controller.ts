@@ -4,6 +4,7 @@ import type {
   SynchDeletedFileCursor,
   SynchDeletedFilesPage,
   SynchDeletedFile,
+  SynchDeletedFilesPurgeResult,
   SynchDeletedFilesRestoreResult,
   SynchEntryVersion,
   SynchEntryVersionCursor,
@@ -174,6 +175,23 @@ export class SynchVersionHistoryController
     }
 
     const result = await this.deps.syncController.restoreDeletedEntries(
+      files.map((file) => ({
+        entryId: file.entryId,
+        revision: file.revision,
+      })),
+    );
+    this.deps.refreshUi();
+    return result;
+  }
+
+  async purgeDeletedFiles(
+    files: SynchDeletedFile[],
+  ): Promise<SynchDeletedFilesPurgeResult> {
+    if (!this.deps.hasAuthenticatedSession() || !this.deps.hasConnectedRemoteVault()) {
+      throw new Error("Connect and sign in before purging deleted files.");
+    }
+
+    const result = await this.deps.syncController.purgeDeletedEntries(
       files.map((file) => ({
         entryId: file.entryId,
         revision: file.revision,

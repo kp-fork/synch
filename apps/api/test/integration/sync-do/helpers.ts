@@ -307,6 +307,68 @@ export async function restoreEntryVersion(
 	});
 }
 
+export async function purgeDeletedEntries(
+	stub: DurableObjectStub,
+	session: SyncDoSession,
+	entries: Array<{ entryId: string; revision: number }>,
+): Promise<{
+	message: {
+		type: "deleted_entries_purged";
+		requestId: string;
+		results: Array<
+			| {
+					status: "accepted";
+					entryId: string;
+			  }
+			| {
+					status: "rejected";
+					entryId: string;
+					code: string;
+					message: string;
+					expectedRevision?: number;
+			  }
+		>;
+	};
+	candidateBlobIds: string[];
+}> {
+	return await runInDurableObject(stub, async (instance) => {
+		const coordinator = instance as unknown as {
+			purgeDeletedEntries: (
+				sessionValue: SyncDoSession,
+				message: {
+					type: "purge_deleted_entries";
+					requestId: string;
+					entries: Array<{ entryId: string; revision: number }>;
+				},
+			) => Promise<{
+				message: {
+					type: "deleted_entries_purged";
+					requestId: string;
+					results: Array<
+						| {
+								status: "accepted";
+								entryId: string;
+						  }
+						| {
+								status: "rejected";
+								entryId: string;
+								code: string;
+								message: string;
+								expectedRevision?: number;
+						  }
+					>;
+				};
+				candidateBlobIds: string[];
+			}>;
+		};
+		return await coordinator.purgeDeletedEntries(session, {
+			type: "purge_deleted_entries",
+			requestId: "request-purge-deleted-entries",
+			entries,
+		});
+	});
+}
+
 export async function ackCursor(
 	stub: DurableObjectStub,
 	session: SyncDoSession,

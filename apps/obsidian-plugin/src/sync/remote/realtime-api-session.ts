@@ -2,6 +2,7 @@ import type {
   CommitAcceptedResult,
   CommitMutationPayload,
   CommitMutationsResult,
+  DeletedEntriesPurgedResponse,
   DeletedEntriesResponse,
   DeletedEntryPageCursor,
   EntryVersionPageCursor,
@@ -9,6 +10,7 @@ import type {
   EntryVersionsRestoredResponse,
   EntryVersionsResponse,
   HelloAckMessage,
+  PurgeDeletedEntryPayload,
   RealtimeSessionState,
   RestoreEntryVersionPayload,
   SyncPolicy,
@@ -186,6 +188,23 @@ export class SyncRealtimeApiSession implements SyncRealtimeSession {
 
     return {
       cursor: message.cursor,
+      results: message.results,
+    };
+  }
+
+  async purgeDeletedEntries(
+    input: PurgeDeletedEntryPayload[],
+  ): Promise<DeletedEntriesPurgedResponse> {
+    const message = await this.transport.request({
+      type: "purge_deleted_entries",
+      entries: input,
+    });
+
+    if (message.type !== "deleted_entries_purged") {
+      throw new Error("purge deleted entries did not produce a deleted_entries_purged response");
+    }
+
+    return {
       results: message.results,
     };
   }

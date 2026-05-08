@@ -66,6 +66,11 @@ export interface RestoreEntryVersionPayload {
   encryptedMetadata: string;
 }
 
+export interface PurgeDeletedEntryPayload {
+  entryId: string;
+  revision: number;
+}
+
 export interface SyncRealtimeSession {
   serverCursor: number;
   storageUsedBytes: number;
@@ -94,6 +99,9 @@ export interface SyncRealtimeSession {
   restoreEntryVersions(
     input: RestoreEntryVersionPayload[],
   ): Promise<EntryVersionsRestoredResponse>;
+  purgeDeletedEntries(
+    input: PurgeDeletedEntryPayload[],
+  ): Promise<DeletedEntriesPurgedResponse>;
   detachLocalVault(): Promise<void>;
   commitMutation(mutation: CommitMutationPayload): Promise<CommitAcceptedResult>;
   commitMutations(mutations: CommitMutationPayload[]): Promise<CommitMutationsResult>;
@@ -165,6 +173,23 @@ export type RestoreEntryVersionBatchResult =
 export interface EntryVersionsRestoredResponse {
   cursor: number;
   results: RestoreEntryVersionBatchResult[];
+}
+
+export type PurgeDeletedEntryBatchResult =
+  | {
+      status: "accepted";
+      entryId: string;
+    }
+  | {
+      status: "rejected";
+      entryId: string;
+      code: string;
+      message: string;
+      expectedRevision?: number;
+    };
+
+export interface DeletedEntriesPurgedResponse {
+  results: PurgeDeletedEntryBatchResult[];
 }
 
 export class SyncRealtimeError extends Error {
@@ -287,8 +312,18 @@ export type ServerMessage =
       type: "entry_versions_restored";
       requestId: string;
     } & EntryVersionsRestoredResponse)
+  | ({
+      type: "deleted_entries_purged";
+      requestId: string;
+    } & DeletedEntriesPurgedResponse)
   | {
       type: "entry_restore_failed";
+      requestId: string;
+      code: string;
+      message: string;
+    }
+  | {
+      type: "deleted_entries_purge_failed";
       requestId: string;
       code: string;
       message: string;

@@ -16,6 +16,7 @@ import type {
 	EntryVersionPageCursor,
 	EntryVersionReason,
 	EntryVersionRow,
+	PurgeDeletedEntryBatchResult,
 	SocketSession,
 	StorageStatusSnapshot,
 } from "./types";
@@ -254,6 +255,16 @@ export class CoordinatorStateRepository {
 		return this.historyStore.readEntryVersion(entryId, versionId, retentionStart);
 	}
 
+	purgeDeletedEntryVersions(
+		entries: Array<{ entryId: string; revision: number }>,
+		retentionStart: number,
+	): {
+		results: PurgeDeletedEntryBatchResult[];
+		candidateBlobIds: string[];
+	} {
+		return this.historyStore.purgeDeletedEntryVersions(entries, retentionStart);
+	}
+
 	async commitMutation(
 		session: SocketSession,
 		message: CommitMutationMessage,
@@ -295,6 +306,10 @@ export class CoordinatorStateRepository {
 
 	deleteBlobIfCollectible(blobId: string, now = Date.now()): void {
 		this.blobStore.deleteBlobIfCollectible(blobId, now);
+	}
+
+	markBlobPendingDeleteIfUnpinned(blobId: string, now = Date.now()): void {
+		this.blobStore.markBlobPendingDeleteIfUnpinned(blobId, now);
 	}
 
 	nextBlobGcAt(): number | null {

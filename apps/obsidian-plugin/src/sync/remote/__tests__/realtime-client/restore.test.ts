@@ -106,4 +106,75 @@ describe("SyncRealtimeClient restore", () => {
       ],
     });
   });
+
+  it("sends deleted entry purge batches and returns per-entry results", async () => {
+    const { socket, session } = await openRealtimeSession();
+
+    const purgePromise = session.purgeDeletedEntries([
+      {
+        entryId: "entry-1",
+        revision: 3,
+      },
+    ]);
+    await waitForSentMessage(socket, 1);
+    const purge = socket.sentMessageAt(1);
+    expect(purge).toMatchObject({
+      type: "purge_deleted_entries",
+      entries: [
+        {
+          entryId: "entry-1",
+          revision: 3,
+        },
+      ],
+    });
+    socket.emitMessage({
+      type: "deleted_entries_purged",
+      requestId: purge.requestId,
+      results: [
+        {
+          status: "accepted",
+          entryId: "entry-1",
+        },
+      ],
+    });
+
+    await expect(purgePromise).resolves.toEqual({
+      results: [
+        {
+          status: "accepted",
+          entryId: "entry-1",
+        },
+      ],
+    });
+  });
+
+  it("routes deleted entry purge failures to the pending request", async () => {
+    const errors: Error[] = [];
+    const { socket, session } = await openRealtimeSession({
+      callbacks: {
+        onError(error) {
+          errors.push(error);
+        },
+      },
+    });
+
+    const purgePromise = session.purgeDeletedEntries([
+      {
+        entryId: "entry-1",
+        revision: 3,
+      },
+    ]);
+    await waitForSentMessage(socket, 1);
+    const purge = socket.sentMessageAt(1);
+    socket.emitMessage({
+      type: "deleted_entries_purge_failed",
+      requestId: purge.requestId,
+      code: "purge_failed",
+      message: "purge failed",
+    });
+
+    await expect(purgePromise).rejects.toBeInstanceOf(SyncRealtimeError);
+    await expect(purgePromise).rejects.toMatchObject({ code: "purge_failed" });
+    expect(errors).toEqual([]);
+  });
 });

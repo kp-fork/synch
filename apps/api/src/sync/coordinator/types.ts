@@ -10,6 +10,7 @@ export type {
 	ListDeletedEntriesMessage,
 	ListEntryStatesMessage,
 	ListEntryVersionsMessage,
+	PurgeDeletedEntriesMessage,
 	RestoreEntryVersionMessage,
 	RestoreEntryVersionsMessage,
 	UnwatchStorageStatusMessage,
@@ -244,6 +245,32 @@ export type EntryVersionsRestoredMessage = {
 	results: RestoreEntryVersionBatchResult[];
 };
 
+export type PurgeDeletedEntryBatchResult =
+	| {
+			status: "accepted";
+			entryId: string;
+	  }
+	| {
+			status: "rejected";
+			entryId: string;
+			code: "not_found" | "not_deleted" | "stale_revision" | "no_history";
+			message: string;
+			expectedRevision?: number;
+	  };
+
+export type DeletedEntriesPurgedMessage = {
+	type: "deleted_entries_purged";
+	requestId: string;
+	results: PurgeDeletedEntryBatchResult[];
+};
+
+export type DeletedEntriesPurgeFailedMessage = {
+	type: "deleted_entries_purge_failed";
+	requestId: string;
+	code: string;
+	message: string;
+};
+
 export type EntryRestoreFailedMessage = {
 	type: "entry_restore_failed";
 	requestId: string;
@@ -277,6 +304,8 @@ export type ServerControlMessage =
 	| DeletedEntriesListFailedMessage
 	| EntryVersionRestoredMessage
 	| EntryVersionsRestoredMessage
+	| DeletedEntriesPurgedMessage
+	| DeletedEntriesPurgeFailedMessage
 	| EntryRestoreFailedMessage
 	| SessionErrorMessage;
 

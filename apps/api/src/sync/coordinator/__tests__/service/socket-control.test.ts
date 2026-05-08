@@ -577,6 +577,76 @@ describe("coordinator websocket control messages", () => {
 		});
 	});
 
+	it("leaves purged history blobs retryable when immediate R2 deletion fails", async () => {
+		const stateRepository = socketStateRepository();
+		const blobRepository = {
+			delete: vi.fn(async () => {
+				throw new Error("r2 unavailable");
+			}),
+		};
+		const purgeDeletedEntryVersions = vi.fn(() => ({
+			results: [
+				{
+					status: "accepted" as const,
+					entryId: "entry-1",
+				},
+			],
+			candidateBlobIds: ["blob-1"],
+		}));
+		const markBlobPendingDeleteIfUnpinned = vi.fn();
+		const deleteBlobIfCollectible = vi.fn();
+		const service = createCoordinatorService({
+			stateRepository: {
+				...stateRepository,
+				purgeDeletedEntryVersions,
+				markBlobPendingDeleteIfUnpinned,
+				readBlob: vi.fn(() => ({
+					blob_id: "blob-1",
+					state: "pending_delete",
+					size_bytes: 100,
+					created_at: 1,
+					last_uploaded_at: 1,
+					delete_after: 1,
+				})),
+				isBlobPinned: vi.fn(() => false),
+				deleteBlobIfCollectible,
+				nextBlobGcAt: vi.fn(() => 1),
+			} as never,
+			socketService: socketServiceMock(),
+			blobRepository: blobRepository as never,
+		});
+		const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+
+		await expect(
+			service.purgeDeletedEntries(testSocketSession(), {
+				type: "purge_deleted_entries",
+				requestId: "request-purge",
+				entries: [{ entryId: "entry-1", revision: 2 }],
+			}),
+		).resolves.toEqual({
+			message: {
+				type: "deleted_entries_purged",
+				requestId: "request-purge",
+				results: [
+					{
+						status: "accepted",
+						entryId: "entry-1",
+					},
+				],
+			},
+			candidateBlobIds: ["blob-1"],
+		});
+
+		expect(purgeDeletedEntryVersions).toHaveBeenCalled();
+		expect(markBlobPendingDeleteIfUnpinned).toHaveBeenCalledWith(
+			"blob-1",
+			expect.any(Number),
+		);
+		expect(blobRepository.delete).toHaveBeenCalledWith("vault-1/blob-1");
+		expect(deleteBlobIfCollectible).not.toHaveBeenCalled();
+		consoleError.mockRestore();
+	});
+
 	it("ignores socket close bookkeeping after a vault purge deletes storage", async () => {
 		let service: ReturnType<typeof createCoordinatorService>;
 		const stateRepository = createMockCoordinatorStateRepository({

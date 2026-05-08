@@ -25,6 +25,7 @@ import {
 import type { SyncConnection } from "../store/store";
 import type { SyncDeletedEntriesPage } from "./version-history-service";
 import type { SyncDeletedEntriesRestoreResult } from "./version-history-service";
+import type { SyncDeletedEntriesPurgeResult } from "./version-history-service";
 import {
   SyncEngine,
   type SyncEngineEntryVersionsPage,
@@ -362,6 +363,15 @@ export class SyncController {
       throw new Error("Connect and sign in before restoring deleted files.");
     }
     return await this.syncEngine.restoreDeletedEntries(entries);
+  }
+
+  async purgeDeletedEntries(
+    entries: Array<{ entryId: string; revision: number }>,
+  ): Promise<SyncDeletedEntriesPurgeResult> {
+    if (!this.deps.hasActiveRemoteVaultSession() || !this.deps.hasAuthenticatedSession()) {
+      throw new Error("Connect and sign in before purging deleted files.");
+    }
+    return await this.syncEngine.purgeDeletedEntries(entries);
   }
 
   async previewDeletedEntry(

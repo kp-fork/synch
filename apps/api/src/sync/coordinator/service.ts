@@ -9,6 +9,7 @@ import type {
 	ListDeletedEntriesMessage,
 	ListEntryStatesMessage,
 	ListEntryVersionsMessage,
+	PurgeDeletedEntriesMessage,
 	RestoreEntryVersionMessage,
 	RestoreEntryVersionResult,
 	RestoreEntryVersionsMessage,
@@ -16,11 +17,14 @@ import type {
 	SocketSession,
 } from "./types";
 import type { SyncTokenService } from "../access/token-service";
-import { blobObjectKeyPrefix } from "../blob/object-key";
+import { blobObjectKey, blobObjectKeyPrefix } from "../blob/object-key";
 import { BlobRepository } from "../blob/repository";
 import { BlobSyncService } from "./blob/sync-service";
 import { CoordinatorControlMessageHandler } from "./socket/control-message-handler";
-import { EntryHistoryService } from "./entry/history-service";
+import {
+	EntryHistoryService,
+	type DeletedEntriesPurgeResult,
+} from "./entry/history-service";
 import { EntrySyncService } from "./entry/sync-service";
 import { HealthSyncService } from "./health/sync-service";
 import type {
@@ -111,6 +115,8 @@ export class CoordinatorService {
 					await this.restoreEntryVersion(session, message),
 				restoreEntryVersions: async (session, message) =>
 					await this.restoreEntryVersions(session, message),
+				purgeDeletedEntries: async (session, message) =>
+					await this.purgeDeletedEntries(session, message),
 			},
 			async () => await this.scheduleHealthSummaryFlush(),
 		);
@@ -175,6 +181,18 @@ export class CoordinatorService {
 		message: RestoreEntryVersionsMessage,
 	): Promise<RestoreEntryVersionsResult> {
 		return await this.entryHistoryService.restoreEntryVersions(session, message);
+	}
+
+	async purgeDeletedEntries(
+		session: SocketSession,
+		message: PurgeDeletedEntriesMessage,
+	): Promise<DeletedEntriesPurgeResult> {
+		const result = await this.entryHistoryService.purgeDeletedEntries(
+			session,
+			message,
+		);
+		await this.deletePurgedHistoryBlobs(session.vaultId, result.candidateBlobIds);
+		return result;
 	}
 
 	async stageBlob(
@@ -311,4 +329,52 @@ export class CoordinatorService {
 		return this.stateRepository.readVersionHistoryRetentionDays() * DAY_IN_MS;
 	}
 
+	private async deletePurgedHistoryBlobs(
+		vaultId: string,
+		blobIds: readonly string[],
+	): Promise<void> {
+		const uniqueBlobIds = [...new Set(blobIds)];
+		if (uniqueBlobIds.length === 0) {
+			return;
+		}
+
+		const now = Date.now();
+		let deletedCount = 0;
+		for (const blobId of uniqueBlobIds) {
+			this.stateRepository.markBlobPendingDeleteIfUnpinned(blobId, now);
+			const blob = this.stateRepository.readBlob(blobId);
+			if (
+				!blob ||
+				blob.state !== "pending_delete" ||
+				(blob.delete_after !== null && blob.delete_after > now) ||
+				this.stateRepository.isBlobPinned(blobId, false, now)
+			) {
+				continue;
+			}
+
+			try {
+				await this.blobRepository.delete(blobObjectKey(vaultId, blobId));
+				this.stateRepository.deleteBlobIfCollectible(blobId, now);
+				deletedCount += 1;
+			} catch (error) {
+				console.error("[sync-coordinator] immediate purged blob deletion failed", {
+					vaultId,
+					blobId,
+					error: error instanceof Error ? error.message : String(error),
+				});
+			}
+		}
+
+		const nextGcAt = this.stateRepository.nextBlobGcAt();
+		if (nextGcAt !== null) {
+			await this.deferMaintenance("blob_gc", nextGcAt, now);
+		}
+		await this.scheduleHealthSummaryFlush(now);
+		if (deletedCount > 0) {
+			this.socketService.broadcastStorageStatus({
+				type: "storage_status_updated",
+				storageStatus: this.stateRepository.readStorageStatus(),
+			});
+		}
+	}
 }

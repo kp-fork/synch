@@ -2,6 +2,7 @@ import type { AuthReadiness } from "../auth/manager";
 import type {
   SynchDeletedFileCursor,
   SynchDeletedFilesPage,
+  SynchDeletedFilesPurgeResult,
   SynchDeletedFile,
   SynchDeletedFilesRestoreResult,
   SynchFileSizeBlockedFile,
@@ -61,4 +62,5 @@ export interface SynchSettingsController {
   ): Promise<SynchDeletedFilesPage>;
   previewDeletedFile(entryId: string, fallbackPath: string): Promise<SynchVersionPreview>;
   restoreDeletedFiles(files: SynchDeletedFile[]): Promise<SynchDeletedFilesRestoreResult>;
+  purgeDeletedFiles(files: SynchDeletedFile[]): Promise<SynchDeletedFilesPurgeResult>;
 }

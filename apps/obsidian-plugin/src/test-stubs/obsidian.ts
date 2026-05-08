@@ -109,6 +109,10 @@ export class MockButtonComponent {
     return this;
   }
 
+  setWarning(): this {
+    return this;
+  }
+
   setDisabled(value: boolean): this {
     this.disabled = value;
     return this;

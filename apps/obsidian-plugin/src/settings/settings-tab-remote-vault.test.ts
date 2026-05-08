@@ -311,6 +311,100 @@ describe("SynchSettingTab remote vault settings", () => {
     expect(restoreDeletedFiles.mock.calls[0]?.[0]).toHaveLength(100);
   });
 
+  it("purges selected deleted files from the modal", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => true));
+    const purgeDeletedFiles = vi.fn(async (files) => ({
+      purged: files.length,
+      failures: [],
+    }));
+    const tab = createSettingsTab({
+      hasAuthenticatedSession: () => true,
+      hasConnectedRemoteVault: () => true,
+      listDeletedFiles: vi.fn(async () => ({
+        files: [
+          {
+            entryId: "entry-ready",
+            path: "Notes/ready.md",
+            revision: 3,
+            deletedAt: 1,
+          },
+          {
+            entryId: "entry-other",
+            path: "Notes/other.md",
+            revision: 4,
+            deletedAt: 2,
+          },
+        ],
+        hasMore: false,
+        nextBefore: null,
+      })),
+      purgeDeletedFiles,
+    });
+
+    tab.display();
+    await getButtonComponents()
+      .find((button) => button.text === "View deleted files")
+      ?.click();
+    await nextTask();
+
+    await getToggleComponents().slice(-2)[0]?.change(true);
+    await getLatestButton("Permanently remove selected (1)")?.click();
+    await nextTask();
+
+    expect(globalThis.confirm).toHaveBeenCalledWith(
+      "Permanently remove version history for 1 selected deleted file? These files will disappear from deleted files and cannot be previewed or restored.",
+    );
+    expect(purgeDeletedFiles).toHaveBeenCalledWith([
+      {
+        entryId: "entry-ready",
+        path: "Notes/ready.md",
+        revision: 3,
+        deletedAt: 1,
+      },
+    ]);
+    expect(getNotices()).toContainEqual({
+      message: "Deleted file purge finished: 1 removed.",
+      timeout: undefined,
+    });
+  });
+
+  it("does not purge selected deleted files when confirmation is cancelled", async () => {
+    vi.stubGlobal("confirm", vi.fn(() => false));
+    const purgeDeletedFiles = vi.fn(async (files) => ({
+      purged: files.length,
+      failures: [],
+    }));
+    const tab = createSettingsTab({
+      hasAuthenticatedSession: () => true,
+      hasConnectedRemoteVault: () => true,
+      listDeletedFiles: vi.fn(async () => ({
+        files: [
+          {
+            entryId: "entry-ready",
+            path: "Notes/ready.md",
+            revision: 3,
+            deletedAt: 1,
+          },
+        ],
+        hasMore: false,
+        nextBefore: null,
+      })),
+      purgeDeletedFiles,
+    });
+
+    tab.display();
+    await getButtonComponents()
+      .find((button) => button.text === "View deleted files")
+      ?.click();
+    await nextTask();
+
+    await getToggleComponents().slice(-1)[0]?.change(true);
+    await getLatestButton("Permanently remove selected (1)")?.click();
+    await nextTask();
+
+    expect(purgeDeletedFiles).not.toHaveBeenCalled();
+  });
+
   it("loads additional deleted file pages from the modal", async () => {
     const listDeletedFiles = vi
       .fn()

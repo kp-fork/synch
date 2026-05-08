@@ -357,6 +357,37 @@ export class CoordinatorBlobStore {
 		);
 	}
 
+	markBlobPendingDeleteIfUnpinned(blobId: string, now: number): void {
+		this.deleteExpiredEntryVersions(now);
+		this.storage.sql.exec(
+			`
+			UPDATE blobs
+			SET state = 'pending_delete',
+				delete_after = CASE
+					WHEN delete_after IS NULL OR delete_after > ? THEN ?
+					ELSE delete_after
+				END
+			WHERE blob_id = ?
+				AND state != 'staged'
+				AND NOT EXISTS (
+					SELECT 1
+					FROM entries
+					WHERE entries.blob_id = blobs.blob_id
+				)
+				AND NOT EXISTS (
+					SELECT 1
+					FROM entry_versions
+					WHERE entry_versions.blob_id = blobs.blob_id
+						AND entry_versions.expires_at > ?
+				)
+			`,
+			now,
+			now,
+			blobId,
+			now,
+		);
+	}
+
 	readBlobState(db: BlobDb, blobId: string): BlobState | null {
 		const blob = db
 			.select({

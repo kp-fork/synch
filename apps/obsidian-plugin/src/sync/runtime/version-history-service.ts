@@ -6,6 +6,7 @@ import type {
   DeletedEntryPageCursor,
   EntryVersion,
   EntryVersionPageCursor,
+  PurgeDeletedEntryPayload,
   RestoreEntryVersionPayload,
   SyncRealtimeSession,
 } from "../remote/realtime-client";
@@ -199,6 +200,27 @@ export class SyncVersionHistoryService {
       return {
         restored: entries.length - failures.length,
         failures,
+      };
+    });
+  }
+
+  async purgeDeletedEntries(
+    entries: PurgeDeletedEntryPayload[],
+  ): Promise<SyncDeletedEntriesPurgeResult> {
+    return await this.deps.withRealtimeSession(async (session) => {
+      const purged = await session.purgeDeletedEntries(entries);
+      return {
+        purged: purged.results.filter((result) => result.status === "accepted").length,
+        failures: purged.results.flatMap((result) =>
+          result.status === "rejected"
+            ? [
+                {
+                  entryId: result.entryId,
+                  message: result.message,
+                },
+              ]
+            : [],
+        ),
       };
     });
   }
@@ -403,6 +425,16 @@ export interface SyncDeletedEntriesRestoreResult {
 }
 
 export interface SyncDeletedEntryRestoreFailure {
+  entryId: string;
+  message: string;
+}
+
+export interface SyncDeletedEntriesPurgeResult {
+  purged: number;
+  failures: SyncDeletedEntryPurgeFailure[];
+}
+
+export interface SyncDeletedEntryPurgeFailure {
   entryId: string;
   message: string;
 }

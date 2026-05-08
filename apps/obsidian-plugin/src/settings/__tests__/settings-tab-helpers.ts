@@ -74,6 +74,10 @@ export function createSettingsTab(
       restored: files.length,
       failures: [],
     })),
+    purgeDeletedFiles: vi.fn(async (files) => ({
+      purged: files.length,
+      failures: [],
+    })),
     ...overrides,
   };
 

@@ -7,6 +7,7 @@ import type {
 	ListDeletedEntriesMessage,
 	ListEntryStatesMessage,
 	ListEntryVersionsMessage,
+	PurgeDeletedEntriesMessage,
 	RestoreEntryVersionMessage,
 	RestoreEntryVersionResult,
 	RestoreEntryVersionsMessage,
@@ -19,6 +20,7 @@ import {
 } from "../protocol";
 import type { CoordinatorSocketService } from "./service";
 import type { CoordinatorStateRepository } from "../state-repository";
+import type { DeletedEntriesPurgeResult } from "../entry/history-service";
 
 export type CoordinatorControlMessageUseCases = {
 	ackCursor(session: SocketSession, cursor: number): Promise<{ cursor: number }>;
@@ -47,6 +49,10 @@ export type CoordinatorControlMessageUseCases = {
 		session: SocketSession,
 		message: RestoreEntryVersionsMessage,
 	): Promise<RestoreEntryVersionsResult>;
+	purgeDeletedEntries(
+		session: SocketSession,
+		message: PurgeDeletedEntriesMessage,
+	): Promise<DeletedEntriesPurgeResult>;
 };
 
 export class CoordinatorControlMessageHandler {
@@ -264,6 +270,26 @@ export class CoordinatorControlMessageHandler {
 			this.socketService.sendSocketMessage(ws, result.message);
 			if (result.broadcastCursor !== null) {
 				this.broadcastCursorExcept(ws, result.broadcastCursor);
+			}
+			return;
+		}
+
+		if (parsed.type === "purge_deleted_entries") {
+			try {
+				const result = await this.useCases.purgeDeletedEntries(session, parsed);
+				this.socketService.sendSocketMessage(ws, result.message);
+			} catch (error) {
+				const details = websocketRequestError(
+					error,
+					"deleted_entries_purge_failed",
+					"deleted entries purge failed",
+				);
+				this.socketService.sendSocketMessage(ws, {
+					type: "deleted_entries_purge_failed",
+					requestId: parsed.requestId,
+					code: details.code,
+					message: details.message,
+				});
 			}
 			return;
 		}

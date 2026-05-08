@@ -4,10 +4,12 @@ import type {
 	CommitMutationResult,
 	CommitMutationsMessage,
 	CommitMutationsResult,
+	DeletedEntriesPurgedMessage,
 	DeletedEntriesListedMessage,
 	EntryVersionsListedMessage,
 	ListDeletedEntriesMessage,
 	ListEntryVersionsMessage,
+	PurgeDeletedEntriesMessage,
 	RestoreEntryVersionBatchResult,
 	RestoreEntryVersionMessage,
 	RestoreEntryVersionResult,
@@ -342,7 +344,35 @@ export class EntryHistoryService {
 			broadcastCursor: committed.broadcastCursor,
 		};
 	}
+
+	async purgeDeletedEntries(
+		session: SocketSession,
+		message: PurgeDeletedEntriesMessage,
+	): Promise<DeletedEntriesPurgeResult> {
+		const versionHistoryRetentionMs = await this.readVersionHistoryRetentionMs(
+			session.vaultId,
+		);
+		const retentionStart = Date.now() - versionHistoryRetentionMs;
+		const purged = this.stateRepository.purgeDeletedEntryVersions(
+			message.entries,
+			retentionStart,
+		);
+
+		return {
+			message: {
+				type: "deleted_entries_purged",
+				requestId: message.requestId,
+				results: purged.results,
+			},
+			candidateBlobIds: purged.candidateBlobIds,
+		};
+	}
 }
+
+export type DeletedEntriesPurgeResult = {
+	message: DeletedEntriesPurgedMessage;
+	candidateBlobIds: string[];
+};
 
 function rejectedRestore(
 	restore: RestoreEntryVersionsMessage["restores"][number],

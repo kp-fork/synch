@@ -2,6 +2,7 @@
 
 ## Added
 
+- Added an option to permanently remove selected deleted files from version history to reclaim remote vault storage.
 - Added Japanese, Simplified Chinese, and Traditional Chinese translations for the Obsidian plugin interface.
 - Added localized billing and pricing links for Japanese, Simplified Chinese, and Traditional Chinese users.
 

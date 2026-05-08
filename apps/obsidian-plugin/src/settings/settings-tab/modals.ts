@@ -4,6 +4,7 @@ import { t } from "../../i18n";
 import type {
   SynchDeletedFileCursor,
   SynchDeletedFilesPage,
+  SynchDeletedFilesPurgeResult,
   SynchDeletedFile,
   SynchDeletedFilesRestoreResult,
   SynchVersionPreview,
@@ -136,6 +137,9 @@ export class DeletedFilesModal extends Modal {
       restoreDeletedFiles: (
         files: SynchDeletedFile[],
       ) => Promise<SynchDeletedFilesRestoreResult>;
+      purgeDeletedFiles: (
+        files: SynchDeletedFile[],
+      ) => Promise<SynchDeletedFilesPurgeResult>;
     },
   ) {
     super(app);
@@ -345,6 +349,19 @@ export class DeletedFilesModal extends Modal {
           }),
       )
       .addButton((button) =>
+        button
+          .setButtonText(
+            selectedCount > 0
+              ? t("deleted.purgeSelectedCount", { count: selectedCount })
+              : t("deleted.purgeSelected"),
+          )
+          .setWarning()
+          .setDisabled(this.loading || selectedCount === 0)
+          .onClick(() => {
+            void this.purgeSelected();
+          }),
+      )
+      .addButton((button) =>
         button.setButtonText(t("close")).onClick(() => {
           this.close();
         }),
@@ -391,6 +408,53 @@ export class DeletedFilesModal extends Modal {
       parts.push(t("deleted.failedCount", { count: failed }));
     }
     new Notice(t("deleted.finished", { summary: parts.join(", ") }));
+    await this.loadDeletedFiles();
+  }
+
+  private async purgeSelected(): Promise<void> {
+    const selectedFiles = this.deletedFiles.filter((file) =>
+      this.selectedEntryIds.has(file.entryId),
+    );
+    if (selectedFiles.length === 0) {
+      return;
+    }
+
+    if (!confirm(t("deleted.purgeConfirm", { count: selectedFiles.length }))) {
+      return;
+    }
+
+    this.loading = true;
+    this.render();
+
+    let result: SynchDeletedFilesPurgeResult;
+    try {
+      result = await this.options.purgeDeletedFiles(selectedFiles);
+    } catch (error) {
+      new Notice(
+        t("deleted.purgeFailed", {
+          message: error instanceof Error ? error.message : String(error),
+        }),
+      );
+      await this.loadDeletedFiles();
+      return;
+    }
+
+    const failedEntryIds = new Set(
+      result.failures.map((failure) => failure.entryId),
+    );
+    for (const file of selectedFiles) {
+      if (!failedEntryIds.has(file.entryId)) {
+        this.selectedEntryIds.delete(file.entryId);
+      }
+    }
+
+    const failed = result.failures.length;
+    const purged = result.purged;
+    const parts = [t("deleted.purgedCount", { count: purged })];
+    if (failed > 0) {
+      parts.push(t("deleted.failedCount", { count: failed }));
+    }
+    new Notice(t("deleted.purgeFinished", { summary: parts.join(", ") }));
     await this.loadDeletedFiles();
   }
 

@@ -10,6 +10,7 @@ import type {
 	ListDeletedEntriesMessage,
 	ListEntryStatesMessage,
 	ListEntryVersionsMessage,
+	PurgeDeletedEntriesMessage,
 	RestoreEntryVersionMessage,
 	RestoreEntryVersionResult,
 	RestoreEntryVersionsMessage,
@@ -18,6 +19,7 @@ import type {
 } from "./sync/coordinator/types";
 import { CoordinatorService } from "./sync/coordinator/service";
 import { createCoordinatorRuntime } from "./runtime";
+import type { DeletedEntriesPurgeResult } from "./sync/coordinator/entry/history-service";
 
 const ALARM_FAILURE_RETRY_MS = 30 * 1000;
 
@@ -98,6 +100,14 @@ export class SyncCoordinator extends DurableObject {
 	): Promise<RestoreEntryVersionsResult> {
 		await this.ready;
 		return await this.coordinatorService.restoreEntryVersions(session, message);
+	}
+
+	async purgeDeletedEntries(
+		session: SocketSession,
+		message: PurgeDeletedEntriesMessage,
+	): Promise<DeletedEntriesPurgeResult> {
+		await this.ready;
+		return await this.coordinatorService.purgeDeletedEntries(session, message);
 	}
 
 	async ackCursor(

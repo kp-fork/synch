@@ -49,6 +49,9 @@ export function createPushSession(
     async restoreEntryVersions() {
       throw new Error("push tests should not restore entry versions");
     },
+    async purgeDeletedEntries() {
+      throw new Error("push tests should not purge deleted entries");
+    },
 	    async detachLocalVault() {},
 	    commitMutation,
     async commitMutations(mutations): Promise<CommitMutationsResult> {

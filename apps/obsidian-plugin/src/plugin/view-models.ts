@@ -106,6 +106,16 @@ export interface SynchDeletedFileRestoreFailure {
   message: string;
 }
 
+export interface SynchDeletedFilesPurgeResult {
+  purged: number;
+  failures: SynchDeletedFilePurgeFailure[];
+}
+
+export interface SynchDeletedFilePurgeFailure {
+  entryId: string;
+  message: string;
+}
+
 export interface SynchEntryVersionCursor {
   capturedAt: number;
   versionId: string;

@@ -176,6 +176,50 @@ describe("SyncVersionHistoryService", () => {
     await store.close();
   });
 
+  it("purges deleted entries through the realtime session", async () => {
+    const store = await createInitializedTestSyncStore(createTestPlugin());
+    const purgeDeletedEntries = vi.fn(async () => ({
+      results: [
+        {
+          status: "accepted" as const,
+          entryId: "entry-purged",
+        },
+        {
+          status: "rejected" as const,
+          entryId: "entry-failed",
+          code: "stale_revision",
+          message: "expected revision 4 but received 3",
+          expectedRevision: 4,
+        },
+      ],
+    }));
+    const service = createService(store, {
+      withRealtimeSession: async (work) =>
+        await work(createRealtimeSession({ purgeDeletedEntries })),
+    });
+
+    await expect(
+      service.purgeDeletedEntries([
+        { entryId: "entry-purged", revision: 3 },
+        { entryId: "entry-failed", revision: 3 },
+      ]),
+    ).resolves.toEqual({
+      purged: 1,
+      failures: [
+        {
+          entryId: "entry-failed",
+          message: "expected revision 4 but received 3",
+        },
+      ],
+    });
+    expect(purgeDeletedEntries).toHaveBeenCalledWith([
+      { entryId: "entry-purged", revision: 3 },
+      { entryId: "entry-failed", revision: 3 },
+    ]);
+
+    await store.close();
+  });
+
   it("continues restoring deleted entries when one payload cannot be prepared", async () => {
     const store = await createInitializedTestSyncStore(createTestPlugin());
     const goodVersion = await createEntryVersion({
@@ -750,6 +794,9 @@ function createRealtimeSession(
     restoreEntryVersion: vi.fn(),
     restoreEntryVersions: vi.fn(async () => ({
       cursor: 0,
+      results: [],
+    })),
+    purgeDeletedEntries: vi.fn(async () => ({
       results: [],
     })),
     commitMutation: vi.fn(),

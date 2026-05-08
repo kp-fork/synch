@@ -423,6 +423,11 @@ export function renderRemoteVaultSettings(
               refresh();
               return result;
             },
+            purgeDeletedFiles: async (files) => {
+              const result = await controller.purgeDeletedFiles(files);
+              refresh();
+              return result;
+            },
           }).open();
         }),
       );

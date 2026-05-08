@@ -3,6 +3,7 @@ import type {
   CommitMutationPayload,
   DeletedEntryPageCursor,
   EntryVersionPageCursor,
+  PurgeDeletedEntryPayload,
   RestoreEntryVersionPayload,
   ServerMessage,
   SyncRealtimeCallbacks,
@@ -51,6 +52,11 @@ type ClientMessage =
       type: "restore_entry_versions";
       requestId: string;
       restores: RestoreEntryVersionPayload[];
+    }
+  | {
+      type: "purge_deleted_entries";
+      requestId: string;
+      entries: PurgeDeletedEntryPayload[];
     }
   | {
       type: "detach_local_vault";
@@ -253,7 +259,8 @@ export class SyncRealtimeSocketSession {
       parsed.type === "entry_states_list_failed" ||
       parsed.type === "entry_versions_list_failed" ||
       parsed.type === "deleted_entries_list_failed" ||
-      parsed.type === "entry_restore_failed"
+      parsed.type === "entry_restore_failed" ||
+      parsed.type === "deleted_entries_purge_failed"
     ) {
       request.reject(new SyncRealtimeError(parsed.code, parsed.message));
       return;
