@@ -19,7 +19,7 @@ signupUrl.searchParams.set("lang", locale);
 const pricingUrl = localizedPath(locale, "/pricing");
 ---
 
-<Layout title={t.meta.billingTitle} locale={locale}>
+<Layout title={t.meta.billingTitle} description={t.meta.billingDescription} locale={locale}>
   <div class="max-w-2xl mx-auto px-6 w-full flex-1 flex flex-col">
     <Header locale={locale} />
 

@@ -21,7 +21,7 @@ const publishedDate = post.data.pubDate.toLocaleDateString(t.blog.dateLocale, {
 });
 ---
 
-<Layout title={`${post.data.title} - Synch`} locale={locale}>
+<Layout title={`${post.data.title} - Synch`} description={post.data.description} locale={locale}>
   <div class="mx-auto flex w-full max-w-3xl flex-1 flex-col px-6">
     <Header locale={locale} />
 

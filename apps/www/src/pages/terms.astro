@@ -9,7 +9,10 @@ const rendered = entry ? await render(entry) : undefined;
 const Content = rendered?.Content;
 ---
 
-<Layout title={entry ? `${entry.data.title} - Synch` : "Terms of Service - Synch"}>
+<Layout
+	title={entry ? `${entry.data.title} - Synch` : "Terms of Service - Synch"}
+	description={entry?.data.description ?? "Terms that apply to the hosted Synch service."}
+>
 	<div class="max-w-2xl mx-auto px-6 w-full flex-1 flex flex-col">
 		<Header />
 

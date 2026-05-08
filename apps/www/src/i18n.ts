@@ -36,10 +36,16 @@ export const ui = {
 	en: {
 		meta: {
 			defaultTitle: "Synch - Open-source E2EE sync for Obsidian",
+			defaultDescription:
+				"An open-source alternative to Obsidian Sync. Your notes are encrypted locally before leaving your device, ensuring complete privacy and control over your data.",
 			pricingTitle: "Pricing - Synch",
+			pricingDescription: "Compare Synch plans and storage limits for end-to-end encrypted Obsidian vault sync.",
 			blogTitle: "Blog - Synch",
+			blogDescription: "Articles about end-to-end encrypted Obsidian sync, privacy, and Synch development.",
 			billingTitle: "Billing - Synch",
+			billingDescription: "Manage your Synch subscription and billing settings.",
 			billingSuccessTitle: "Confirming subscription - Synch",
+			billingSuccessDescription: "Confirming your Synch subscription and applying it to your account.",
 		},
 		nav: {
 			pricing: "Pricing",
@@ -153,10 +159,16 @@ export const ui = {
 	ko: {
 		meta: {
 			defaultTitle: "Synch - Obsidian용 오픈소스 종단 간 암호화 동기화",
+			defaultDescription:
+				"Obsidian Sync를 대체할 수 있는 오픈소스 동기화 서비스입니다. 노트는 기기 안에서 먼저 암호화된 뒤 전송되므로, 내 데이터는 내가 안전하게 관리할 수 있습니다.",
 			pricingTitle: "요금제 - Synch",
+			pricingDescription: "종단 간 암호화 Obsidian vault 동기화를 위한 Synch 요금제와 저장 용량을 비교하세요.",
 			blogTitle: "블로그 - Synch",
+			blogDescription: "종단 간 암호화 Obsidian 동기화, 개인정보 보호, Synch 개발에 관한 글을 읽어보세요.",
 			billingTitle: "구독 관리 - Synch",
+			billingDescription: "Synch 구독과 결제 설정을 관리하세요.",
 			billingSuccessTitle: "구독 확인 중 - Synch",
+			billingSuccessDescription: "Synch 구독을 확인하고 계정에 적용하는 중입니다.",
 		},
 		nav: {
 			pricing: "요금제",
