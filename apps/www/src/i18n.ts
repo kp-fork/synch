@@ -306,7 +306,13 @@ export const ui = {
 		home: {
 			heroTitle: ["Obsidianのための", "エンドツーエンド暗号化同期。"],
 			featuredTitle: "詳しく見る",
-			featuredPosts: [],
+			featuredPosts: [
+				{
+					title: "Synchのエンドツーエンド暗号化はどのように動きますか?",
+					body: "Synchがvaultデータを暗号化し、vault keyを保護し、別の端末で安全にデータを開く仕組みを平易に説明します。",
+					href: "/blog/encryption-and-decryption"
+				}
+			],
 			heroBody:
 				"Obsidian Syncのオープンソース代替です。ノートはデバイス上で暗号化されてから送信されるため、データのプライバシーと管理権を保てます。",
 			getStarted: "はじめる",
@@ -423,7 +429,13 @@ export const ui = {
 		home: {
 			heroTitle: ["面向 Obsidian 的", "端到端加密同步。"],
 			featuredTitle: "了解更多",
-			featuredPosts: [],
+			featuredPosts: [
+				{
+					title: "Synch 的端到端加密是如何工作的？",
+					body: "用通俗方式说明 Synch 如何加密 vault 数据、保护 vault key，并在另一台设备上安全打开数据。",
+					href: "/blog/encryption-and-decryption"
+				}
+			],
 			heroBody:
 				"Obsidian Sync 的开源替代方案。你的笔记会先在设备上加密再离开设备，确保隐私和数据控制权。",
 			getStarted: "开始使用",
@@ -540,7 +552,13 @@ export const ui = {
 		home: {
 			heroTitle: ["適用於 Obsidian 的", "端對端加密同步。"],
 			featuredTitle: "了解更多",
-			featuredPosts: [],
+			featuredPosts: [
+				{
+					title: "Synch 的端對端加密是如何運作的？",
+					body: "用通俗方式說明 Synch 如何加密 vault 資料、保護 vault key，並在另一台裝置上安全開啟資料。",
+					href: "/blog/encryption-and-decryption"
+				}
+			],
 			heroBody:
 				"Obsidian Sync 的開源替代方案。你的筆記會先在裝置上加密再離開裝置，確保隱私與資料控制權。",
 			getStarted: "開始使用",
