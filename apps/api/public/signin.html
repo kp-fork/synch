@@ -106,6 +106,75 @@
 					loggedInRedirecting: "로그인되었습니다. 이동 중...",
 					requestFailed: "요청에 실패했습니다.",
 				},
+				ja: {
+					title: "おかえりなさい",
+					subtitle: "続行するにはアカウントにサインインしてください",
+					email: "メール",
+					password: "パスワード",
+					submit: "サインイン",
+					verificationRequired: "メール認証が必要です",
+					checkInbox: "認証リンクが届いているか受信箱を確認してください。",
+					resendVerification: "認証メールを再送信",
+					noAccount: "アカウントをお持ちでないですか？",
+					signUp: "登録",
+					resendAvailableIn: "{seconds}秒後に再送信できます",
+					sending: "送信中...",
+					failedToResend: "再送信できませんでした",
+					resent: "認証メールを再送信しました。",
+					apiUnavailable: "APIに接続できません。",
+					apiUnavailableWithHint: "APIに接続できません。サーバーURLを確認してから再試行してください。",
+					loggingIn: "サインイン中...",
+					authFailed: "認証に失敗しました。",
+					verificationRequiredButton: "認証が必要です",
+					loggedInRedirecting: "サインインしました。移動中...",
+					requestFailed: "リクエストに失敗しました。",
+				},
+				"zh-cn": {
+					title: "欢迎回来",
+					subtitle: "登录你的账户以继续",
+					email: "邮箱",
+					password: "密码",
+					submit: "登录",
+					verificationRequired: "需要邮箱验证",
+					checkInbox: "请查看收件箱中的验证链接。",
+					resendVerification: "重新发送验证邮件",
+					noAccount: "还没有账户？",
+					signUp: "注册",
+					resendAvailableIn: "{seconds} 秒后可重新发送",
+					sending: "发送中...",
+					failedToResend: "重新发送失败",
+					resent: "验证邮件已重新发送。",
+					apiUnavailable: "无法连接 API。",
+					apiUnavailableWithHint: "无法连接 API。请检查服务器 URL 后重试。",
+					loggingIn: "登录中...",
+					authFailed: "认证失败。",
+					verificationRequiredButton: "需要验证",
+					loggedInRedirecting: "已登录。正在跳转...",
+					requestFailed: "请求失败。",
+				},
+				"zh-tw": {
+					title: "歡迎回來",
+					subtitle: "登入你的帳戶以繼續",
+					email: "電子郵件",
+					password: "密碼",
+					submit: "登入",
+					verificationRequired: "需要電子郵件驗證",
+					checkInbox: "請查看收件匣中的驗證連結。",
+					resendVerification: "重新傳送驗證電子郵件",
+					noAccount: "還沒有帳戶？",
+					signUp: "註冊",
+					resendAvailableIn: "{seconds} 秒後可重新傳送",
+					sending: "傳送中...",
+					failedToResend: "重新傳送失敗",
+					resent: "驗證電子郵件已重新傳送。",
+					apiUnavailable: "無法連接 API。",
+					apiUnavailableWithHint: "無法連接 API。請檢查伺服器 URL 後再試一次。",
+					loggingIn: "登入中...",
+					authFailed: "驗證失敗。",
+					verificationRequiredButton: "需要驗證",
+					loggedInRedirecting: "已登入。正在前往...",
+					requestFailed: "請求失敗。",
+				},
 			};
 			const locale = getLocale();
 			const form = document.querySelector("#sign-in-form");
@@ -198,17 +267,25 @@
 			});
 
 			function getLocale() {
-				const supportedLocales = ["en", "ko"];
 				const params = new URLSearchParams(window.location.search);
 				const candidates = [
 					params.get("lang"),
-					navigator.language?.split("-")[0],
+					navigator.language,
 				];
-				const selected = candidates.find((candidate) =>
-					supportedLocales.includes(candidate),
-				) || "en";
+				const selected = candidates.map(normalizeLocale).find(Boolean) || "en";
 				document.documentElement.lang = selected;
 				return selected;
+			}
+
+			function normalizeLocale(candidate) {
+				const locale = candidate?.toLowerCase() || "";
+				if (messages[locale]) return locale;
+				if (locale === "en" || locale.startsWith("en-")) return "en";
+				if (locale === "ko" || locale.startsWith("ko-")) return "ko";
+				if (locale === "ja" || locale.startsWith("ja-")) return "ja";
+				if (locale === "zh-tw" || locale === "zh-hk" || locale === "zh-hant" || locale.startsWith("zh-hant-")) return "zh-tw";
+				if (locale === "zh" || locale === "zh-cn" || locale === "zh-sg" || locale === "zh-hans" || locale.startsWith("zh-hans-")) return "zh-cn";
+				return "";
 			}
 
 			function t(key, params = {}) {
@@ -231,6 +308,7 @@
 				if (signupLink && returnTo) {
 					const signupUrl = new URL("/signup", window.location.origin);
 					signupUrl.searchParams.set("return_to", returnTo);
+					signupUrl.searchParams.set("lang", locale);
 					signupLink.href = signupUrl.toString();
 				}
 
@@ -248,16 +326,17 @@
 			function loadReturnTo() {
 				const params = new URLSearchParams(window.location.search);
 				const requested = params.get("return_to") || params.get("callbackURL") || "";
-				const fallback = new URL("/vaults", window.location.origin).toString();
+				const fallback = new URL("/vaults", window.location.origin);
+				fallback.searchParams.set("lang", locale);
 				if (!requested.trim()) {
-					return fallback;
+					return fallback.toString();
 				}
 
 				try {
 					const parsed = new URL(requested, window.location.href);
-					return parsed.origin === window.location.origin ? parsed.toString() : fallback;
+					return parsed.origin === window.location.origin ? parsed.toString() : fallback.toString();
 				} catch {
-					return fallback;
+					return fallback.toString();
 				}
 			}
 
@@ -305,7 +384,7 @@
 							}
 							startResendCooldown();
 						} else {
-							setStatus(msg);
+							setStatus(msg, true);
 						}
 						return;
 					}
@@ -313,19 +392,19 @@
 					setStatus(t("loggedInRedirecting"));
 					window.location.assign(returnTo || "/");
 				} catch {
-					setStatus(t("apiUnavailableWithHint"));
+					setStatus(t("apiUnavailableWithHint"), true);
 				} finally {
 					setSubmitting(false);
 				}
 			}
 
-			function setStatus(message) {
+			function setStatus(message, isError = false) {
 				if (status.classList.contains("text-red-400")) {
 					status.classList.remove("text-red-400");
 					status.classList.add("text-zinc-400");
 				}
 				status.textContent = message;
-				if (message.includes("failed") || message.includes("Unable") || message.includes("실패") || message.includes("할 수 없습니다")) {
+				if (isError) {
 					status.classList.remove("text-zinc-400");
 					status.classList.add("text-red-400");
 				}

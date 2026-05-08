@@ -171,6 +171,10 @@
 			function redirectToSignIn() {
 				const signInUrl = new URL("/signin", window.location.origin);
 				signInUrl.searchParams.set("return_to", window.location.href);
+				const lang = new URLSearchParams(window.location.search).get("lang");
+				if (lang) {
+					signInUrl.searchParams.set("lang", lang);
+				}
 				window.location.assign(signInUrl.toString());
 			}
 

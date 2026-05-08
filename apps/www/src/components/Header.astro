@@ -9,9 +9,10 @@ const locale = Astro.props.locale ?? getLocale(Astro.currentLocale);
 const t = ui[locale].nav;
 const apiUrl = import.meta.env.PUBLIC_API_URL || "";
 const authBaseUrl = apiUrl || Astro.url.origin;
-const vaultsUrl = new URL("/vaults", authBaseUrl).toString();
+const vaultsUrl = new URL("/vaults", authBaseUrl);
+vaultsUrl.searchParams.set("lang", locale);
 const signupUrl = new URL("/signup", authBaseUrl);
-signupUrl.searchParams.set("return_to", vaultsUrl);
+signupUrl.searchParams.set("return_to", vaultsUrl.toString());
 signupUrl.searchParams.set("lang", locale);
 const authButtonClass =
   "inline-flex h-8 min-w-16 items-center justify-center rounded bg-zinc-200 px-3 text-xs font-medium text-[#0a0a0a] transition-colors hover:bg-white";
@@ -41,7 +42,7 @@ const authButtonClass =
 </header>
 
 <script
-  define:vars={{ apiUrl, authButtonClass, vaultsLabel: t.vaults, vaultsUrl }}
+  define:vars={{ apiUrl, authButtonClass, vaultsLabel: t.vaults, vaultsUrl: vaultsUrl.toString() }}
 >
   async function checkAuth() {
     const authLink = document.getElementById("auth-link");

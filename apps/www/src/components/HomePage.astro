@@ -13,9 +13,10 @@ const t = ui[locale].home;
 const repositoryUrl = "https://github.com/hjinco/synch";
 const apiUrl = import.meta.env.PUBLIC_API_URL || "";
 const authBaseUrl = apiUrl || Astro.url.origin;
-const vaultsUrl = new URL("/vaults", authBaseUrl).toString();
+const vaultsUrl = new URL("/vaults", authBaseUrl);
+vaultsUrl.searchParams.set("lang", locale);
 const signupUrl = new URL("/signup", authBaseUrl);
-signupUrl.searchParams.set("return_to", vaultsUrl);
+signupUrl.searchParams.set("return_to", vaultsUrl.toString());
 signupUrl.searchParams.set("lang", locale);
 ---
 

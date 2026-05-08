@@ -124,6 +124,87 @@
 					created: "생성일 {date}",
 					deletionStatus: "삭제 {status}",
 				},
+				ja: {
+					title: "リモート Vault",
+					subtitle: "この Synch アカウントに接続された暗号化 Vault を管理します。リモート Vault を削除しても、ローカルの Obsidian ファイルは削除されません。",
+					signOut: "サインアウト",
+					signedIn: "サインイン済み",
+					loading: "Vaultを読み込み中...",
+					refresh: "更新",
+					deleteTitle: "リモート Vault を削除",
+					confirmLabel: "確認するには Vault 名を入力してください",
+					cancel: "キャンセル",
+					deletePermanently: "完全に削除",
+					unableToSignOut: "サインアウトできません。",
+					apiUnavailable: "APIに接続できません。",
+					unableToLoadVaults: "Vaultを読み込めません。",
+					countOne: "1個のリモート Vault",
+					countMany: "{count}個のリモート Vault",
+					empty: "このアカウントに接続されたリモート Vault はありません。",
+					deleting: "削除中",
+					delete: "削除",
+					deleteCopy: "このアカウントからリモート Vault「{name}」を完全に削除します。ローカルの Obsidian ファイルは削除されません。",
+					deletingVault: "{name}を削除中...",
+					unableToDeleteVault: "Vaultを削除できません。",
+					queuedForDeletion: "{name}を削除キューに追加しました。",
+					unknown: "不明",
+					created: "作成日 {date}",
+					deletionStatus: "削除 {status}",
+				},
+				"zh-cn": {
+					title: "远程 vault",
+					subtitle: "管理连接到此 Synch 账户的加密 vault。删除远程 vault 不会删除本地 Obsidian 文件。",
+					signOut: "退出登录",
+					signedIn: "已登录",
+					loading: "正在加载 vault...",
+					refresh: "刷新",
+					deleteTitle: "删除远程 vault",
+					confirmLabel: "输入 vault 名称以确认",
+					cancel: "取消",
+					deletePermanently: "永久删除",
+					unableToSignOut: "无法退出登录。",
+					apiUnavailable: "无法连接 API。",
+					unableToLoadVaults: "无法加载 vault。",
+					countOne: "1 个远程 vault",
+					countMany: "{count} 个远程 vault",
+					empty: "此账户没有连接任何远程 vault。",
+					deleting: "正在删除",
+					delete: "删除",
+					deleteCopy: "这会从此账户永久移除远程 vault “{name}”。本地 Obsidian 文件不会被删除。",
+					deletingVault: "正在删除 {name}...",
+					unableToDeleteVault: "无法删除 vault。",
+					queuedForDeletion: "{name} 已加入删除队列。",
+					unknown: "未知",
+					created: "创建于 {date}",
+					deletionStatus: "删除 {status}",
+				},
+				"zh-tw": {
+					title: "遠端 vault",
+					subtitle: "管理連接到此 Synch 帳戶的加密 vault。刪除遠端 vault 不會刪除本機 Obsidian 檔案。",
+					signOut: "登出",
+					signedIn: "已登入",
+					loading: "正在載入 vault...",
+					refresh: "重新整理",
+					deleteTitle: "刪除遠端 vault",
+					confirmLabel: "輸入 vault 名稱以確認",
+					cancel: "取消",
+					deletePermanently: "永久刪除",
+					unableToSignOut: "無法登出。",
+					apiUnavailable: "無法連接 API。",
+					unableToLoadVaults: "無法載入 vault。",
+					countOne: "1 個遠端 vault",
+					countMany: "{count} 個遠端 vault",
+					empty: "此帳戶沒有連接任何遠端 vault。",
+					deleting: "正在刪除",
+					delete: "刪除",
+					deleteCopy: "這會從此帳戶永久移除遠端 vault「{name}」。本機 Obsidian 檔案不會被刪除。",
+					deletingVault: "正在刪除 {name}...",
+					unableToDeleteVault: "無法刪除 vault。",
+					queuedForDeletion: "{name} 已加入刪除佇列。",
+					unknown: "未知",
+					created: "建立於 {date}",
+					deletionStatus: "刪除 {status}",
+				},
 			};
 			const locale = getLocale();
 			const statusEl = document.querySelector("#status");
@@ -209,21 +290,30 @@
 			function redirectToLogin() {
 				const loginUrl = new URL("/signin", window.location.origin);
 				loginUrl.searchParams.set("return_to", window.location.href);
+				loginUrl.searchParams.set("lang", locale);
 				window.location.assign(loginUrl.toString());
 			}
 
 			function getLocale() {
-				const supportedLocales = ["en", "ko"];
 				const params = new URLSearchParams(window.location.search);
 				const candidates = [
 					params.get("lang"),
-					navigator.language?.split("-")[0],
+					navigator.language,
 				];
-				const selected = candidates.find((candidate) =>
-					supportedLocales.includes(candidate),
-				) || "en";
+				const selected = candidates.map(normalizeLocale).find(Boolean) || "en";
 				document.documentElement.lang = selected;
 				return selected;
+			}
+
+			function normalizeLocale(candidate) {
+				const locale = candidate?.toLowerCase() || "";
+				if (messages[locale]) return locale;
+				if (locale === "en" || locale.startsWith("en-")) return "en";
+				if (locale === "ko" || locale.startsWith("ko-")) return "ko";
+				if (locale === "ja" || locale.startsWith("ja-")) return "ja";
+				if (locale === "zh-tw" || locale === "zh-hk" || locale === "zh-hant" || locale.startsWith("zh-hant-")) return "zh-tw";
+				if (locale === "zh" || locale === "zh-cn" || locale === "zh-sg" || locale === "zh-hans" || locale.startsWith("zh-hans-")) return "zh-cn";
+				return "";
 			}
 
 			function t(key, params = {}) {
