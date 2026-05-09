@@ -96,7 +96,10 @@ export function createAuth(database: D1Database, config: AuthConfig) {
 			}),
 			...(config.plugins ?? []),
 			bearer(),
-			deviceAuthorization({ verificationUri: getDeviceVerificationUri(config.baseURL) }),
+			deviceAuthorization({
+				verificationUri: getDeviceVerificationUri(config.baseURL),
+				schema: {},
+			}),
 		],
 	});
 
