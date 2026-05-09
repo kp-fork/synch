@@ -6,11 +6,16 @@ It is currently in beta.
 Synch is an independent community plugin and service. It is not affiliated with
 Obsidian.
 
+Translations: [한국어](docs/i18n/README.ko.md) ·
+[日本語](docs/i18n/README.ja.md) ·
+[简体中文](docs/i18n/README.zh-CN.md) ·
+[繁體中文](docs/i18n/README.zh-TW.md)
+
 ## Install with BRAT
 
-Synch is not yet available through the Obsidian Community Plugins directory. To install the Obsidian plugin with [Obsidian42 - BRAT](https://github.com/TfTHacker/obsidian42-brat):
+Synch is not yet available through the Obsidian Community Plugins directory. To install the Obsidian plugin with [BRAT](https://github.com/TfTHacker/obsidian42-brat):
 
-1. Install and enable `Obsidian42 - BRAT` from Obsidian Community Plugins.
+1. Search for `BRAT` in Obsidian Community Plugins, then install and enable it.
 2. Open the command palette and run `BRAT: Add a beta plugin for testing`.
 3. Paste `https://github.com/hjinco/synch`.
 4. Add the plugin, then refresh the Community Plugins list.
