@@ -10,6 +10,7 @@ describe("SynchServerPluginVersionChecker", () => {
       json: {
         status: "update_required",
         minVersion: "1.2.0",
+        apiMajor: 1,
         message: "Update required.",
       },
     }));
@@ -20,6 +21,7 @@ describe("SynchServerPluginVersionChecker", () => {
     await expect(checker.check("https://api.synch.test/", "1.1.0")).resolves.toEqual({
       status: "update_required",
       minVersion: "1.2.0",
+      apiMajor: 1,
       message: "Update required.",
     });
     expect(request).toHaveBeenCalledWith({

@@ -31,6 +31,7 @@ describe("checkObsidianPluginVersion", () => {
 		).toEqual({
 			status: "update_required",
 			minVersion: "1.2.0",
+			apiMajor: 1,
 			message:
 				"Synch plugin update is required. Sync has been paused until the plugin is updated.",
 		});
@@ -42,6 +43,11 @@ describe("checkObsidianPluginVersion", () => {
 				minVersion: "1.2.0",
 			}).status,
 		).toBe("ok");
+		expect(
+			checkObsidianPluginVersion("1.2.0", {
+				minVersion: "1.2.0",
+			}).apiMajor,
+		).toBe(1);
 		expect(
 			checkObsidianPluginVersion("1.2.1", {
 				minVersion: "1.2.0",

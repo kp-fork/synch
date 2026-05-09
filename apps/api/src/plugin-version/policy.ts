@@ -1,13 +1,16 @@
 export const MIN_SUPPORTED_OBSIDIAN_PLUGIN_VERSION = "0.0.9";
+export const SYNCH_API_MAJOR_VERSION = 1;
 
 export type ObsidianPluginVersionCheckResult =
 	| {
 			status: "ok";
 			minVersion: string;
+			apiMajor: number;
 	  }
 	| {
 			status: "update_required";
 			minVersion: string;
+			apiMajor: number;
 			message: string;
 	  };
 
@@ -15,14 +18,17 @@ export function checkObsidianPluginVersion(
 	currentVersion: string,
 	options: {
 		minVersion?: string;
+		apiMajor?: number;
 	} = {},
 ): ObsidianPluginVersionCheckResult {
 	const minVersion = options.minVersion ?? MIN_SUPPORTED_OBSIDIAN_PLUGIN_VERSION;
+	const apiMajor = options.apiMajor ?? SYNCH_API_MAJOR_VERSION;
 
 	if (compareStrictSemver(currentVersion, minVersion) < 0) {
 		return {
 			status: "update_required",
 			minVersion,
+			apiMajor,
 			message:
 				"Synch plugin update is required. Sync has been paused until the plugin is updated.",
 		};
@@ -31,6 +37,7 @@ export function checkObsidianPluginVersion(
 	return {
 		status: "ok",
 		minVersion,
+		apiMajor,
 	};
 }
 

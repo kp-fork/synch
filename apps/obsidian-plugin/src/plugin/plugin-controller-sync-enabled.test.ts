@@ -88,6 +88,7 @@ describe("SynchPluginController sync enabled setting", () => {
         json: {
           status: "update_required",
           minVersion: "1.2.0",
+          apiMajor: 1,
           message: "Update Synch before syncing.",
         },
       })),
@@ -127,6 +128,54 @@ describe("SynchPluginController sync enabled setting", () => {
     expect(refreshUi).toHaveBeenCalled();
     expect(getNotices().filter((notice) => notice.message === "Update Synch before syncing."))
       .toHaveLength(2);
+  });
+
+  it("does not enable sync when the server API major is incompatible", async () => {
+    const plugin = createPluginWithSettings({
+      apiBaseUrl: "http://127.0.0.1:8787",
+      fileRules: DEFAULT_SYNC_FILE_RULES,
+      syncEnabled: false,
+    });
+    setRequestUrlMock(
+      vi.fn(async () => ({
+        status: 200,
+        json: {
+          status: "ok",
+          minVersion: "0.0.9",
+          apiMajor: 2,
+        },
+      })),
+    );
+    const ensureAutoSyncState = vi
+      .spyOn(SyncController.prototype, "ensureAutoSyncState")
+      .mockResolvedValue();
+    const stopAutoSyncAndMarkNotReady = vi
+      .spyOn(SyncController.prototype, "stopAutoSyncAndMarkNotReady")
+      .mockImplementation(() => {});
+    const refreshUi = vi.fn();
+    const controller = new SynchPluginController({
+      plugin,
+      refreshUi,
+    });
+    await controller.initialize();
+
+    const message =
+      "This Synch server is not compatible with this plugin version. Update the server or install a compatible Synch plugin version.";
+    expect(controller.getSyncState()).toBe("update_required");
+    expect(controller.getPluginUpdateStatus()).toEqual({
+      state: "update_required",
+      currentVersion: "0.0.1",
+      minVersion: "0.0.9",
+      message,
+    });
+
+    await controller.setSyncEnabled(true);
+    await controller.ensureAutoSyncState();
+
+    expect(ensureAutoSyncState).not.toHaveBeenCalled();
+    expect(stopAutoSyncAndMarkNotReady).toHaveBeenCalled();
+    expect(controller.isSyncEnabled()).toBe(false);
+    expect(getNotices().filter((notice) => notice.message === message)).toHaveLength(2);
   });
 
   it("stops auto sync and persists disabled state when sync is disabled", async () => {

@@ -15,6 +15,7 @@ describe("plugin version routes", () => {
 		await expect(response.json()).resolves.toMatchObject({
 			status: "ok",
 			minVersion: "0.0.9",
+			apiMajor: 1,
 		});
 	});
 
@@ -29,6 +30,7 @@ describe("plugin version routes", () => {
 		await expect(response.json()).resolves.toMatchObject({
 			status: "update_required",
 			minVersion: "0.0.9",
+			apiMajor: 1,
 		});
 	});
 

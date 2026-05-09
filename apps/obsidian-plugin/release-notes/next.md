@@ -11,3 +11,5 @@
 - Localized sync status and file-size-limit warnings now follow the selected Obsidian language more broadly.
 
 ## Fixed
+
+- Sync now pauses when the configured Synch server reports an incompatible API version.

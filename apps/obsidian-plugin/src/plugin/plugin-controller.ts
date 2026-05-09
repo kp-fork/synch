@@ -29,7 +29,10 @@ import type {
   SynchSyncState,
   SynchVersionPreview,
 } from "./view-models";
-import { SynchServerPluginVersionChecker } from "./server-version-checker";
+import {
+  SUPPORTED_SYNCH_API_MAJOR,
+  SynchServerPluginVersionChecker,
+} from "./server-version-checker";
 import { SynchPluginUpdateChecker } from "./update-checker";
 import { normalizeExcludedFolders, type SyncFileRules } from "../sync/core/file-rules";
 import type { SyncTokenResponse } from "../sync/remote/client";
@@ -836,6 +839,20 @@ export class SynchPluginController implements SynchSettingsController {
         this.getApiBaseUrl(),
         this.plugin.manifest.version,
       );
+      if (status.apiMajor !== SUPPORTED_SYNCH_API_MAJOR) {
+        this.pluginUpdateStatus = {
+          state: "update_required",
+          currentVersion: this.plugin.manifest.version,
+          minVersion: status.minVersion,
+          message:
+            "This Synch server is not compatible with this plugin version. Update the server or install a compatible Synch plugin version.",
+        };
+        this.syncController.stopAutoSyncAndMarkNotReady();
+        new Notice(this.getPluginUpdateRequiredMessage(), 0);
+        this.refreshUi();
+        return;
+      }
+
       if (status.status !== "update_required") {
         return;
       }

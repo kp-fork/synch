@@ -4,14 +4,18 @@ import {
   type HttpClient,
 } from "../http/request";
 
+export const SUPPORTED_SYNCH_API_MAJOR = 1;
+
 export type ServerPluginVersionStatus =
   | {
       status: "ok";
       minVersion: string;
+      apiMajor: number;
     }
   | {
       status: "update_required";
       minVersion: string;
+      apiMajor: number;
       message: string;
     };
 
@@ -28,17 +32,18 @@ export class SynchServerPluginVersionChecker {
     }
 
     const body = response.json;
-    if (!isServerPluginVersionStatus(body)) {
+    const status = parseServerPluginVersionStatus(body);
+    if (!status) {
       throw new Error("Server plugin version check returned an invalid response.");
     }
 
-    return body;
+    return status;
   }
 }
 
-function isServerPluginVersionStatus(value: unknown): value is ServerPluginVersionStatus {
+function parseServerPluginVersionStatus(value: unknown): ServerPluginVersionStatus | null {
   if (!value || typeof value !== "object") {
-    return false;
+    return null;
   }
 
   const record = value as Record<string, unknown>;
@@ -46,12 +51,34 @@ function isServerPluginVersionStatus(value: unknown): value is ServerPluginVersi
     typeof record.status !== "string" ||
     typeof record.minVersion !== "string"
   ) {
-    return false;
+    return null;
+  }
+
+  const apiMajor = parseApiMajor(record.apiMajor);
+  if (apiMajor === null) {
+    return null;
   }
 
   if (record.status === "ok") {
-    return true;
+    return {
+      status: "ok",
+      minVersion: record.minVersion,
+      apiMajor,
+    };
   }
 
-  return record.status === "update_required" && typeof record.message === "string";
+  if (record.status === "update_required" && typeof record.message === "string") {
+    return {
+      status: "update_required",
+      minVersion: record.minVersion,
+      apiMajor,
+      message: record.message,
+    };
+  }
+
+  return null;
+}
+
+function parseApiMajor(value: unknown): number | null {
+  return Number.isInteger(value) && Number(value) >= 0 ? Number(value) : null;
 }
