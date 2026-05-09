@@ -19,8 +19,8 @@
 		<div class="max-w-3xl mx-auto px-6 w-full flex-1 flex flex-col justify-center py-12 sm:py-24">
 			<div class="mb-8 text-center">
 				<a href="/" class="text-zinc-200 font-normal tracking-wider text-xs uppercase hover:opacity-80 transition-opacity inline-block mb-8">Synch</a>
-				<h1 class="text-2xl font-light text-zinc-200 tracking-tight mb-2">Authorize Obsidian Device</h1>
-				<p class="text-zinc-500 text-xs">Sign in to approve this Obsidian device.</p>
+				<h1 class="text-2xl font-light text-zinc-200 tracking-tight mb-2" data-i18n="title">Authorize Obsidian Device</h1>
+				<p class="text-zinc-500 text-xs" data-i18n="subtitle">Sign in to approve this Obsidian device.</p>
 			</div>
 
 			<div id="status" class="text-zinc-400 text-xs text-center min-h-[1.5rem] mb-2" aria-live="polite"></div>
@@ -28,16 +28,134 @@
 
 			<div id="approval-panel" class="flex flex-col sm:flex-row justify-center gap-3 mb-8 max-w-xs mx-auto w-full" hidden>
 				<button id="approve-button" type="button" class="w-full py-2 px-4 text-xs bg-zinc-200 text-[#0a0a0a] hover:bg-white rounded transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-					Approve device
+					<span data-i18n="approve">Approve device</span>
 				</button>
 				<button id="deny-button" type="button" class="w-full py-2 px-4 text-xs bg-transparent border border-zinc-700 text-zinc-300 hover:bg-zinc-800 rounded transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
-					Deny device
+					<span data-i18n="deny">Deny device</span>
 				</button>
 			</div>
 		</div>
 
 		<script>
+			const messages = {
+				en: {
+					pageTitle: "Authorize device",
+					title: "Authorize Obsidian Device",
+					subtitle: "Sign in to approve this Obsidian device.",
+					approve: "Approve device",
+					deny: "Deny device",
+					checkingSession: "Checking session...",
+					loggedInAs: "Logged in as {account}",
+					openFromObsidian: "Open this page from Obsidian to approve a device.",
+					checkingDevice: "Checking device request...",
+					approved: "The device has been approved. Return to Obsidian to finish sign-in.",
+					denied: "The device request has been denied.",
+					invalidOrConsumed: "This device code is invalid or has already been consumed.",
+					approveToFinish: "Approve this Obsidian device to finish sign-in.",
+					unableToLoad: "Unable to load device request.",
+					unableToCheckSession: "Unable to check your session.",
+					invalidCode: "This device code is invalid.",
+					approving: "Approving device...",
+					denying: "Denying device...",
+					unableToUpdate: "Unable to update device request.",
+					apiUnavailableWithHint: "Unable to reach the API. Check the server URL and try again.",
+					requestFailed: "Request failed.",
+				},
+				ko: {
+					pageTitle: "기기 승인",
+					title: "Obsidian 기기 승인",
+					subtitle: "이 Obsidian 기기를 승인하려면 로그인하세요.",
+					approve: "기기 승인",
+					deny: "기기 거부",
+					checkingSession: "세션 확인 중...",
+					loggedInAs: "{account}(으)로 로그인됨",
+					openFromObsidian: "기기를 승인하려면 Obsidian에서 이 페이지를 여세요.",
+					checkingDevice: "기기 요청 확인 중...",
+					approved: "기기가 승인되었습니다. 로그인을 마치려면 Obsidian으로 돌아가세요.",
+					denied: "기기 요청이 거부되었습니다.",
+					invalidOrConsumed: "이 기기 코드는 유효하지 않거나 이미 사용되었습니다.",
+					approveToFinish: "로그인을 마치려면 이 Obsidian 기기를 승인하세요.",
+					unableToLoad: "기기 요청을 불러올 수 없습니다.",
+					unableToCheckSession: "세션을 확인할 수 없습니다.",
+					invalidCode: "이 기기 코드는 유효하지 않습니다.",
+					approving: "기기 승인 중...",
+					denying: "기기 거부 중...",
+					unableToUpdate: "기기 요청을 업데이트할 수 없습니다.",
+					apiUnavailableWithHint: "API에 연결할 수 없습니다. 서버 URL을 확인한 뒤 다시 시도하세요.",
+					requestFailed: "요청에 실패했습니다.",
+				},
+				ja: {
+					pageTitle: "デバイスを承認",
+					title: "Obsidian デバイスを承認",
+					subtitle: "この Obsidian デバイスを承認するにはサインインしてください。",
+					approve: "デバイスを承認",
+					deny: "デバイスを拒否",
+					checkingSession: "セッションを確認中...",
+					loggedInAs: "{account} としてサインイン中",
+					openFromObsidian: "デバイスを承認するには Obsidian からこのページを開いてください。",
+					checkingDevice: "デバイスリクエストを確認中...",
+					approved: "デバイスが承認されました。サインインを完了するには Obsidian に戻ってください。",
+					denied: "デバイスリクエストは拒否されました。",
+					invalidOrConsumed: "このデバイスコードは無効、またはすでに使用されています。",
+					approveToFinish: "サインインを完了するにはこの Obsidian デバイスを承認してください。",
+					unableToLoad: "デバイスリクエストを読み込めません。",
+					unableToCheckSession: "セッションを確認できません。",
+					invalidCode: "このデバイスコードは無効です。",
+					approving: "デバイスを承認中...",
+					denying: "デバイスを拒否中...",
+					unableToUpdate: "デバイスリクエストを更新できません。",
+					apiUnavailableWithHint: "APIに接続できません。サーバーURLを確認してから再試行してください。",
+					requestFailed: "リクエストに失敗しました。",
+				},
+				"zh-cn": {
+					pageTitle: "授权设备",
+					title: "授权 Obsidian 设备",
+					subtitle: "登录以批准此 Obsidian 设备。",
+					approve: "批准设备",
+					deny: "拒绝设备",
+					checkingSession: "正在检查会话...",
+					loggedInAs: "已以 {account} 登录",
+					openFromObsidian: "请从 Obsidian 打开此页面以批准设备。",
+					checkingDevice: "正在检查设备请求...",
+					approved: "设备已批准。请返回 Obsidian 完成登录。",
+					denied: "设备请求已被拒绝。",
+					invalidOrConsumed: "此设备代码无效或已被使用。",
+					approveToFinish: "批准此 Obsidian 设备以完成登录。",
+					unableToLoad: "无法加载设备请求。",
+					unableToCheckSession: "无法检查你的会话。",
+					invalidCode: "此设备代码无效。",
+					approving: "正在批准设备...",
+					denying: "正在拒绝设备...",
+					unableToUpdate: "无法更新设备请求。",
+					apiUnavailableWithHint: "无法连接 API。请检查服务器 URL 后重试。",
+					requestFailed: "请求失败。",
+				},
+				"zh-tw": {
+					pageTitle: "授權裝置",
+					title: "授權 Obsidian 裝置",
+					subtitle: "登入以核准此 Obsidian 裝置。",
+					approve: "核准裝置",
+					deny: "拒絕裝置",
+					checkingSession: "正在檢查工作階段...",
+					loggedInAs: "已以 {account} 登入",
+					openFromObsidian: "請從 Obsidian 開啟此頁面以核准裝置。",
+					checkingDevice: "正在檢查裝置請求...",
+					approved: "裝置已核准。請返回 Obsidian 完成登入。",
+					denied: "裝置請求已遭拒絕。",
+					invalidOrConsumed: "此裝置代碼無效或已被使用。",
+					approveToFinish: "核准此 Obsidian 裝置以完成登入。",
+					unableToLoad: "無法載入裝置請求。",
+					unableToCheckSession: "無法檢查你的工作階段。",
+					invalidCode: "此裝置代碼無效。",
+					approving: "正在核准裝置...",
+					denying: "正在拒絕裝置...",
+					unableToUpdate: "無法更新裝置請求。",
+					apiUnavailableWithHint: "無法連接 API。請檢查伺服器 URL 後再試一次。",
+					requestFailed: "請求失敗。",
+				},
+			};
 			const params = new URLSearchParams(window.location.search);
+			const locale = getLocale();
 			let activeUserCode = normalizeUserCode(params.get("user_code") ?? "");
 
 			const approvalPanel = document.querySelector("#approval-panel");
@@ -54,13 +172,14 @@
 				void submitDeviceDecision("deny");
 			});
 
+			applyTranslations();
 			void refreshDevice();
 
 			async function refreshDevice() {
 				setVisible(approvalPanel, false);
 				setVisible(identity, false);
 
-				setStatus("Checking session...");
+				setStatus(t("checkingSession"));
 				try {
 					const session = await getSession();
 					const accountLabel = session?.user?.email || session?.user?.name || "";
@@ -70,34 +189,34 @@
 						return;
 					}
 
-					identity.textContent = `Logged in as ${accountLabel}`;
+					identity.textContent = t("loggedInAs", { account: accountLabel });
 					setVisible(identity, true);
 
 					if (!activeUserCode) {
-						setStatus("Open this page from Obsidian to approve a device.");
+						setStatus(t("openFromObsidian"));
 						return;
 					}
 
-					setStatus("Checking device request...");
+					setStatus(t("checkingDevice"));
 					const deviceStatus = await getDeviceStatus();
 
 					if (deviceStatus === "approved") {
-						setStatus("The device has been approved. Return to Obsidian to finish sign-in.");
+						setStatus(t("approved"), "success");
 						return;
 					}
 					if (deviceStatus === "denied") {
-						setStatus("The device request has been denied.");
+						setStatus(t("denied"), "error");
 						return;
 					}
 					if (deviceStatus !== "pending") {
-						setStatus("This device code is invalid or has already been consumed.");
+						setStatus(t("invalidOrConsumed"), "error");
 						return;
 					}
 
 					setVisible(approvalPanel, true);
-					setStatus("Approve this Obsidian device to finish sign-in.");
+					setStatus(t("approveToFinish"));
 				} catch (error) {
-					setStatus(error instanceof Error ? error.message : "Unable to load device request.");
+					setStatus(error instanceof Error ? error.message : t("unableToLoad"), "error");
 				}
 			}
 
@@ -107,7 +226,7 @@
 					return null;
 				}
 				if (!response.ok) {
-					throw new Error(await readErrorMessage(response, "Unable to check your session."));
+					throw new Error(await readErrorMessage(response, t("unableToCheckSession")));
 				}
 				return await response.json();
 			}
@@ -117,7 +236,7 @@
 					`/api/auth/device?user_code=${encodeURIComponent(activeUserCode)}`,
 				);
 				if (!response.ok) {
-					throw new Error(await readErrorMessage(response, "This device code is invalid."));
+					throw new Error(await readErrorMessage(response, t("invalidCode")));
 				}
 				const json = await response.json();
 				return json.status;
@@ -129,7 +248,7 @@
 				}
 
 				setActionButtonsDisabled(true);
-				setStatus(decision === "approve" ? "Approving device..." : "Denying device...");
+				setStatus(decision === "approve" ? t("approving") : t("denying"));
 				try {
 					const response = await fetchApi(`/api/auth/device/${decision}`, {
 						method: "POST",
@@ -140,19 +259,19 @@
 					});
 
 					if (!response.ok) {
-						setStatus(await readErrorMessage(response, "Unable to update device request."), "error");
+						setStatus(await readErrorMessage(response, t("unableToUpdate")), "error");
 						return;
 					}
 
 					setVisible(approvalPanel, false);
 					setStatus(
 						decision === "approve"
-							? "The device has been approved. Return to Obsidian to finish sign-in."
-							: "The device request has been denied.",
+							? t("approved")
+							: t("denied"),
 						decision === "approve" ? "success" : "error",
 					);
 				} catch {
-					setStatus("Unable to reach the API. Check the server URL and try again.", "error");
+					setStatus(t("apiUnavailableWithHint"), "error");
 				} finally {
 					setActionButtonsDisabled(false);
 				}
@@ -176,6 +295,42 @@
 					signInUrl.searchParams.set("lang", lang);
 				}
 				window.location.assign(signInUrl.toString());
+			}
+
+			function getLocale() {
+				const candidates = [
+					params.get("lang"),
+					navigator.language,
+				];
+				const selected = candidates.map(normalizeLocale).find(Boolean) || "en";
+				document.documentElement.lang = selected;
+				return selected;
+			}
+
+			function normalizeLocale(candidate) {
+				const locale = candidate?.toLowerCase() || "";
+				if (messages[locale]) return locale;
+				if (locale === "en" || locale.startsWith("en-")) return "en";
+				if (locale === "ko" || locale.startsWith("ko-")) return "ko";
+				if (locale === "ja" || locale.startsWith("ja-")) return "ja";
+				if (locale === "zh-tw" || locale === "zh-hk" || locale === "zh-hant" || locale.startsWith("zh-hant-")) return "zh-tw";
+				if (locale === "zh" || locale === "zh-cn" || locale === "zh-sg" || locale === "zh-hans" || locale.startsWith("zh-hans-")) return "zh-cn";
+				return "";
+			}
+
+			function t(key, params = {}) {
+				const template = messages[locale]?.[key] || messages.en[key] || key;
+				return Object.entries(params).reduce(
+					(text, [name, value]) => text.replaceAll(`{${name}}`, String(value)),
+					template,
+				);
+			}
+
+			function applyTranslations() {
+				for (const element of document.querySelectorAll("[data-i18n]")) {
+					element.textContent = t(element.dataset.i18n);
+				}
+				document.title = `${t("pageTitle")} | Synch`;
 			}
 
 			function setStatus(message, tone = inferTone(message)) {
@@ -225,7 +380,7 @@
 				denyButton.disabled = disabled;
 			}
 
-			async function readErrorMessage(response, fallback = "Request failed.") {
+			async function readErrorMessage(response, fallback = t("requestFailed")) {
 				try {
 					const json = await response.json();
 					return json.message || json.error_description || json.error || fallback;
