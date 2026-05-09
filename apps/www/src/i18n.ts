@@ -73,12 +73,20 @@ export const ui = {
 			viewSource: "View Source",
 			features: [
 				{
-					title: "Zero Knowledge",
-					body: "Everything is encrypted with AES-256-GCM on your device. The server never sees your raw notes.",
+					title: "End-to-end encryption",
+					body: "Your vault is encrypted on your device before upload. Synch stores encrypted data, not readable notes.",
 				},
 				{
-					title: "Open Source",
-					body: "Built in the open. You can inspect the code, host it yourself, or contribute to the project on GitHub.",
+					title: "Version history",
+					body: "Recover from accidental edits with encrypted history for synced files, available within your plan's retention window.",
+				},
+				{
+					title: "Deleted file recovery",
+					body: "Bring back deleted notes and attachments while they are still kept in version history.",
+				},
+				{
+					title: "Sync in 3 seconds",
+					body: "Synch checks for changes frequently so edits can move between devices in just a few seconds.",
 				},
 			],
 			installTitle: "How to Install",
@@ -201,12 +209,20 @@ export const ui = {
 			viewSource: "소스 보기",
 			features: [
 				{
-					title: "서버도 볼 수 없는 암호화",
-					body: "모든 데이터는 내 기기에서 AES-256-GCM으로 암호화됩니다. 서버에는 암호화된 내용만 저장되고, 원본 노트는 전달되지 않습니다.",
+					title: "종단 간 암호화",
+					body: "vault는 업로드 전에 내 기기에서 먼저 암호화됩니다. Synch는 읽을 수 있는 노트가 아니라 암호화된 데이터만 저장합니다.",
 				},
 				{
-					title: "오픈소스",
-					body: "개발 과정과 코드가 모두 공개되어 있습니다. 코드를 직접 확인하고, 직접 호스팅하거나, GitHub에서 프로젝트에 참여할 수 있습니다.",
+					title: "버전 히스토리",
+					body: "실수로 노트를 바꿔도 플랜의 보관 기간 안에서 동기화된 파일의 암호화된 기록을 되돌릴 수 있습니다.",
+				},
+				{
+					title: "삭제된 파일 복구",
+					body: "삭제한 노트와 첨부 파일도 버전 히스토리에 남아 있는 동안 다시 가져올 수 있습니다.",
+				},
+				{
+					title: "3초 안에 동기화",
+					body: "Synch는 변경 사항을 자주 확인해, 편집 내용이 몇 초 안에 다른 기기로 이동할 수 있게 합니다.",
 				},
 			],
 			installTitle: "설치 방법",
@@ -329,12 +345,20 @@ export const ui = {
 			viewSource: "ソースを見る",
 			features: [
 				{
-					title: "ゼロ知識",
-					body: "すべてのデータはデバイス上でAES-256-GCMにより暗号化されます。サーバーが生のノートを見ることはありません。",
+					title: "エンドツーエンド暗号化",
+					body: "vaultはアップロード前に端末上で暗号化されます。Synchが保存するのは読めるノートではなく、暗号化されたデータです。",
 				},
 				{
-					title: "オープンソース",
-					body: "開かれた環境で開発されています。コードを確認し、自分でホストし、GitHubでプロジェクトに参加できます。",
+					title: "バージョン履歴",
+					body: "誤って編集しても、プランの保持期間内なら同期済みファイルの暗号化された履歴から戻せます。",
+				},
+				{
+					title: "削除ファイルの復元",
+					body: "削除したノートや添付ファイルも、バージョン履歴に残っている間は取り戻せます。",
+				},
+				{
+					title: "3秒で同期",
+					body: "Synchは変更をこまめに確認し、編集内容を数秒で別の端末へ届けられるようにします。",
 				},
 			],
 			installTitle: "インストール方法",
@@ -457,12 +481,20 @@ export const ui = {
 			viewSource: "查看源码",
 			features: [
 				{
-					title: "零知识",
-					body: "所有数据都在你的设备上使用 AES-256-GCM 加密。服务器永远看不到原始笔记。",
+					title: "端到端加密",
+					body: "vault 会先在你的设备上加密再上传。Synch 存储的是加密数据，而不是可读取的笔记。",
 				},
 				{
-					title: "开源",
-					body: "开放构建。你可以检查代码、自行托管，或在 GitHub 上参与项目。",
+					title: "版本历史",
+					body: "误改内容后，可在方案保留期内从同步文件的加密历史中恢复。",
+				},
+				{
+					title: "恢复已删除文件",
+					body: "已删除的笔记和附件只要仍保留在版本历史中，就可以找回。",
+				},
+				{
+					title: "3 秒同步",
+					body: "Synch 会频繁检查更改，让编辑内容可在几秒内同步到其他设备。",
 				},
 			],
 			installTitle: "如何安装",
@@ -585,12 +617,20 @@ export const ui = {
 			viewSource: "查看原始碼",
 			features: [
 				{
-					title: "零知識",
-					body: "所有資料都在你的裝置上使用 AES-256-GCM 加密。伺服器永遠看不到原始筆記。",
+					title: "端對端加密",
+					body: "vault 會先在你的裝置上加密再上傳。Synch 儲存的是加密資料，而不是可讀取的筆記。",
 				},
 				{
-					title: "開源",
-					body: "以開放方式建置。你可以檢視程式碼、自行託管，或在 GitHub 上參與專案。",
+					title: "版本記錄",
+					body: "誤改內容後，可在方案保留期限內從同步檔案的加密記錄中復原。",
+				},
+				{
+					title: "復原已刪除檔案",
+					body: "已刪除的筆記和附件只要仍保留在版本記錄中，就可以找回。",
+				},
+				{
+					title: "3 秒同步",
+					body: "Synch 會頻繁檢查變更，讓編輯內容可在幾秒內同步到其他裝置。",
 				},
 			],
 			installTitle: "如何安裝",
