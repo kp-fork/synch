@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const polarMocks = vi.hoisted(() => ({
 	createPolarCheckout: vi.fn(),
@@ -17,6 +17,12 @@ import type { SubscriptionProductIdsByPlanId } from "../subscription/policy";
 describe("BillingService", () => {
 	beforeEach(() => {
 		vi.clearAllMocks();
+		vi.useFakeTimers();
+		vi.setSystemTime(new Date("2026-05-08T00:00:00.000Z"));
+	});
+
+	afterEach(() => {
+		vi.useRealTimers();
 	});
 
 	it("creates starter checkout for the user's default organization", async () => {
