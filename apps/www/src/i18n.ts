@@ -46,6 +46,8 @@ export const ui = {
 			billingDescription: "Manage your Synch subscription and billing settings.",
 			billingSuccessTitle: "Confirming subscription - Synch",
 			billingSuccessDescription: "Confirming your Synch subscription and applying it to your account.",
+			notFoundTitle: "Page not found - Synch",
+			notFoundDescription: "The page you requested could not be found.",
 		},
 		nav: {
 			pricing: "Pricing",
@@ -141,6 +143,13 @@ export const ui = {
 			continue: "Continue to vaults",
 			fallback: "Still waiting for payment confirmation. You can continue and refresh later.",
 		},
+		notFound: {
+			eyebrow: "404",
+			heading: "Page not found",
+			message: "This page may have moved, or the link may no longer be valid.",
+			home: "Go home",
+			pricing: "View pricing",
+		},
 		billingSettings: {
 			eyebrow: "Billing",
 			heading: "Manage subscription",
@@ -182,6 +191,8 @@ export const ui = {
 			billingDescription: "Synch 구독과 결제 설정을 관리하세요.",
 			billingSuccessTitle: "구독 확인 중 - Synch",
 			billingSuccessDescription: "Synch 구독을 확인하고 계정에 적용하는 중입니다.",
+			notFoundTitle: "페이지를 찾을 수 없음 - Synch",
+			notFoundDescription: "요청한 페이지를 찾을 수 없습니다.",
 		},
 		nav: {
 			pricing: "요금제",
@@ -277,6 +288,13 @@ export const ui = {
 			continue: "Vaults로 이동",
 			fallback: "아직 결제 확인이 끝나지 않았습니다. 먼저 이동한 뒤 나중에 새로고침해도 됩니다.",
 		},
+		notFound: {
+			eyebrow: "404",
+			heading: "페이지를 찾을 수 없습니다",
+			message: "페이지가 이동되었거나 더 이상 유효하지 않은 링크일 수 있습니다.",
+			home: "홈으로 이동",
+			pricing: "요금제 보기",
+		},
 		billingSettings: {
 			eyebrow: "구독",
 			heading: "구독 관리",
@@ -318,6 +336,8 @@ export const ui = {
 			billingDescription: "Synchのサブスクリプションと請求設定を管理します。",
 			billingSuccessTitle: "サブスクリプション確認中 - Synch",
 			billingSuccessDescription: "Synchのサブスクリプションを確認し、アカウントへ適用しています。",
+			notFoundTitle: "ページが見つかりません - Synch",
+			notFoundDescription: "リクエストされたページは見つかりませんでした。",
 		},
 		nav: {
 			pricing: "料金",
@@ -413,6 +433,13 @@ export const ui = {
 			continue: "Vaultsへ進む",
 			fallback: "支払い確認がまだ完了していません。先に進み、あとで更新できます。",
 		},
+		notFound: {
+			eyebrow: "404",
+			heading: "ページが見つかりません",
+			message: "ページが移動したか、リンクが無効になっている可能性があります。",
+			home: "ホームへ戻る",
+			pricing: "料金を見る",
+		},
 		billingSettings: {
 			eyebrow: "請求",
 			heading: "サブスクリプション管理",
@@ -454,6 +481,8 @@ export const ui = {
 			billingDescription: "管理你的 Synch 订阅和账单设置。",
 			billingSuccessTitle: "正在确认订阅 - Synch",
 			billingSuccessDescription: "正在确认你的 Synch 订阅并应用到账户。",
+			notFoundTitle: "页面未找到 - Synch",
+			notFoundDescription: "无法找到你请求的页面。",
 		},
 		nav: {
 			pricing: "价格",
@@ -549,6 +578,13 @@ export const ui = {
 			continue: "继续前往 Vaults",
 			fallback: "仍在等待付款确认。你可以先继续，稍后再刷新。",
 		},
+		notFound: {
+			eyebrow: "404",
+			heading: "页面未找到",
+			message: "该页面可能已移动，或链接不再有效。",
+			home: "返回首页",
+			pricing: "查看价格",
+		},
 		billingSettings: {
 			eyebrow: "账单",
 			heading: "管理订阅",
@@ -590,6 +626,8 @@ export const ui = {
 			billingDescription: "管理你的 Synch 訂閱與帳單設定。",
 			billingSuccessTitle: "正在確認訂閱 - Synch",
 			billingSuccessDescription: "正在確認你的 Synch 訂閱並套用到帳戶。",
+			notFoundTitle: "找不到頁面 - Synch",
+			notFoundDescription: "找不到你要求的頁面。",
 		},
 		nav: {
 			pricing: "價格",
@@ -684,6 +722,13 @@ export const ui = {
 			message: "正在套用你的訂閱。通常只需要幾秒鐘。",
 			continue: "繼續前往 Vaults",
 			fallback: "仍在等待付款確認。你可以先繼續，稍後再重新整理。",
+		},
+		notFound: {
+			eyebrow: "404",
+			heading: "找不到頁面",
+			message: "此頁面可能已移動，或連結已不再有效。",
+			home: "返回首頁",
+			pricing: "查看價格",
 		},
 		billingSettings: {
 			eyebrow: "帳單",
