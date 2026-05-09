@@ -94,6 +94,11 @@ export const ui = {
 			],
 			addRepositorySuffix: "and add it.",
 			copyTitle: "Copy to clipboard",
+			selfHosting: {
+				title: "Use your own Synch server",
+				body: "Create a Synch server on a free Cloudflare account and paste its address into the Obsidian plugin. The guide walks through the setup step by step.",
+				link: "Read the self-hosting guide",
+			},
 		},
 		pricing: {
 			heading: "Simple, transparent pricing.",
@@ -217,6 +222,11 @@ export const ui = {
 			],
 			addRepositorySuffix: "입력한 뒤 추가합니다.",
 			copyTitle: "클립보드에 복사",
+			selfHosting: {
+				title: "내 Synch 서버 사용하기",
+				body: "Cloudflare 무료 계정에 Synch 서버를 만들고, 그 주소를 Obsidian 플러그인에 넣어 사용할 수 있습니다. 가이드에서 설정 과정을 차근차근 안내합니다.",
+				link: "셀프 호스팅 가이드 보기",
+			},
 		},
 		pricing: {
 			heading: "간단하고 투명한 요금제.",
@@ -340,6 +350,11 @@ export const ui = {
 			],
 			addRepositorySuffix: "を追加します。",
 			copyTitle: "クリップボードにコピー",
+			selfHosting: {
+				title: "自分の Synch サーバーを使う",
+				body: "Cloudflare の無料アカウントに Synch サーバーを作成し、そのアドレスを Obsidian プラグインに入力できます。",
+				link: "セルフホストガイドを読む",
+			},
 		},
 		pricing: {
 			heading: "シンプルで透明な料金。",
@@ -463,6 +478,11 @@ export const ui = {
 			],
 			addRepositorySuffix: "并添加。",
 			copyTitle: "复制到剪贴板",
+			selfHosting: {
+				title: "使用自己的 Synch 服务器",
+				body: "你可以在 Cloudflare 免费账号中创建 Synch 服务器，并把它的地址填入 Obsidian 插件。",
+				link: "阅读自托管指南",
+			},
 		},
 		pricing: {
 			heading: "简单透明的价格。",
@@ -586,6 +606,11 @@ export const ui = {
 			],
 			addRepositorySuffix: "並新增。",
 			copyTitle: "複製到剪貼簿",
+			selfHosting: {
+				title: "使用自己的 Synch 伺服器",
+				body: "你可以在 Cloudflare 免費帳號中建立 Synch 伺服器，並把它的位址填入 Obsidian 外掛。",
+				link: "閱讀自行託管指南",
+			},
 		},
 		pricing: {
 			heading: "簡單透明的價格。",

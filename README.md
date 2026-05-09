@@ -38,6 +38,14 @@ silently discarding it.
 The plugin can use the hosted Synch Cloud API or a custom API base URL for a
 self-hosted deployment.
 
+## Self-hosting
+
+You can run your own Synch server on a free Cloudflare account and connect the
+Obsidian plugin to it with a custom server URL.
+
+See the self-hosting guide:
+[https://synch.run/self-hosting](https://synch.run/self-hosting)
+
 ## Disclosures
 
 This section is provided for Obsidian developer policy review and for users who

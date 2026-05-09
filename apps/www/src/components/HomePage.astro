@@ -11,6 +11,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = ui[locale].home;
 const repositoryUrl = "https://github.com/hjinco/synch";
+const selfHostingHref = localizedPath(locale, "/self-hosting");
 const apiUrl = import.meta.env.PUBLIC_API_URL || "";
 const authBaseUrl = apiUrl || Astro.url.origin;
 const vaultsUrl = new URL("/vaults", authBaseUrl);
@@ -149,6 +150,20 @@ signupUrl.searchParams.set("lang", locale);
               ))
             }
           </ol>
+        </div>
+      </div>
+
+      <div class="mt-32 space-y-6">
+        <div class="w-8 h-px bg-zinc-800"></div>
+        <div class="max-w-xl space-y-4">
+          <h2 class="text-xl text-zinc-300 font-normal">{t.selfHosting.title}</h2>
+          <p class="text-zinc-500 leading-relaxed">{t.selfHosting.body}</p>
+          <a
+            href={selfHostingHref}
+            class="inline-flex items-center rounded border border-zinc-800 px-4 py-2 text-xs text-zinc-300 transition-all hover:border-zinc-700 hover:bg-zinc-900/60 hover:text-zinc-200"
+          >
+            {t.selfHosting.link}
+          </a>
         </div>
       </div>
 
