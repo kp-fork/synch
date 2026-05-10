@@ -11,6 +11,7 @@ interface Props {
 const { locale } = Astro.props;
 const t = ui[locale].home;
 const repositoryUrl = "https://github.com/hjinco/synch";
+const demoPlaybackId = "X02Xss3kvaRlmCjOmB00zCoKNnHZdPzqpTZqggJ301PMVk";
 const selfHostingHref = localizedPath(locale, "/self-hosting");
 const apiUrl = import.meta.env.PUBLIC_API_URL || "";
 const authBaseUrl = apiUrl || Astro.url.origin;
@@ -22,6 +23,8 @@ signupUrl.searchParams.set("lang", locale);
 ---
 
 <Layout locale={locale}>
+  <script is:inline src="https://cdn.jsdelivr.net/npm/@mux/mux-player" defer></script>
+
   <div class="max-w-2xl mx-auto px-6 w-full flex-1 flex flex-col">
     <Header locale={locale} />
 
@@ -50,6 +53,21 @@ signupUrl.searchParams.set("lang", locale);
           >
             {t.viewSource}
           </a>
+        </div>
+
+        <div class="pt-8">
+          <mux-player
+            playback-id={demoPlaybackId}
+            title="Synch demo video"
+            metadata-video-id="synch-landing-demo"
+            metadata-video-title="Synch landing page demo"
+            autoplay="muted"
+            muted
+            loop
+            playsinline
+            class="aspect-video w-full rounded-md border border-zinc-800/80 bg-zinc-950 shadow-2xl shadow-black/30"
+            style="--controls: none;"
+          ></mux-player>
         </div>
       </div>
 
