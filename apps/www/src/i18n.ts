@@ -247,23 +247,23 @@ export const ui = {
 			privacy: "개인정보 처리방침",
 		},
 		home: {
-			heroTitle: ["Obsidian을 위한", "종단간 암호화 동기화."],
+			heroTitle: ["Obsidian을 위한", "종단 간 암호화 동기화."],
 			featuredTitle: "더 알아보기",
 			featuredPosts: [
 				{
 					title: "Synch의 종단 간 암호화는 어떻게 작동할까요?",
-					body: "Synch가 어떻게 데이터를 암호화하고, 키를 보호하며, 다른 기기에서 안전하게 데이터를 여는지 알기 쉽게 설명합니다.",
+					body: "Synch가 데이터를 암호화하고 키를 보호하며 다른 기기에서 안전하게 데이터를 여는 방식을 알기 쉽게 설명합니다.",
 					href: "/blog/encryption-and-decryption"
 				}
 			],
 			heroBody:
-				"Obsidian Sync를 대체할 수 있는 오픈소스 동기화 서비스입니다. 노트는 기기 안에서 먼저 암호화된 뒤 전송되므로, 내 데이터는 내가 안전하게 관리할 수 있습니다.",
+				"Obsidian Sync를 대체할 수 있는 오픈소스 동기화 서비스입니다. 노트는 기기에서 먼저 암호화된 뒤 전송되므로 데이터를 더 안전하게 관리할 수 있습니다.",
 			getStarted: "시작하기",
 			viewSource: "소스 보기",
 			features: [
 				{
 					title: "종단 간 암호화",
-					body: "vault는 업로드 전에 내 기기에서 먼저 암호화됩니다. Synch는 읽을 수 있는 노트가 아니라 암호화된 데이터만 저장합니다.",
+					body: "vault는 업로드 전에 기기에서 먼저 암호화됩니다. Synch는 읽을 수 있는 노트가 아니라 암호화된 데이터만 저장합니다.",
 				},
 				{
 					title: "버전 히스토리",
@@ -275,7 +275,7 @@ export const ui = {
 				},
 				{
 					title: "3초 안에 동기화",
-					body: "Synch는 변경 사항을 자주 확인해, 편집 내용이 몇 초 안에 다른 기기로 이동할 수 있게 합니다.",
+					body: "Synch는 변경 사항을 자주 확인해 편집 내용이 몇 초 안에 다른 기기로 이동할 수 있게 합니다.",
 				},
 			],
 			installTitle: "설치 방법",
@@ -293,7 +293,7 @@ export const ui = {
 			copyTitle: "클립보드에 복사",
 			selfHosting: {
 				title: "내 Synch 서버 사용하기",
-				body: "Cloudflare 무료 계정에 Synch 서버를 만들고, 그 주소를 Obsidian 플러그인에 넣어 사용할 수 있습니다. 가이드에서 설정 과정을 차근차근 안내합니다.",
+				body: "Cloudflare 무료 계정에 Synch 서버를 만들고 그 주소를 Obsidian 플러그인에 넣어 사용할 수 있습니다. 가이드에서 설정 과정을 차근차근 안내합니다.",
 				link: "셀프 호스팅 가이드 보기",
 			},
 		},
