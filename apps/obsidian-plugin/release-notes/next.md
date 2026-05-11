@@ -7,3 +7,5 @@
 ## Changed
 
 ## Fixed
+
+- Signing out now disconnects the active remote vault on this device first.

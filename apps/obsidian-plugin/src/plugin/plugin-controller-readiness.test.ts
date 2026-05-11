@@ -214,6 +214,76 @@ describe("SynchPluginController readiness reconciliation", () => {
     expect(resumeAutoSync).toHaveBeenCalledTimes(1);
   });
 
+  it("disconnects the remote vault before signing out", async () => {
+    const events: string[] = [];
+    const plugin = await createConnectedPlugin();
+    const request = vi.fn(async (input: unknown) => {
+      const url = String((input as { url?: string }).url ?? "");
+      if (url.endsWith("/api/auth/get-session")) {
+        return {
+          status: 200,
+          json: {
+            session: { id: "session-1" },
+            user: {
+              id: "user-1",
+              email: "user@example.com",
+              name: "User One",
+            },
+          },
+        };
+      }
+
+      if (url.endsWith("/v1/vaults/vault-1/bootstrap")) {
+        return {
+          status: 200,
+          json: {
+            vault: {
+              id: "vault-1",
+              name: "Recovered",
+              activeKeyVersion: 1,
+              createdAt: "2026-04-22T00:00:00.000Z",
+            },
+            wrappers: [],
+          },
+        };
+      }
+
+      if (url.endsWith("/api/auth/sign-out")) {
+        events.push("sign-out");
+        return {
+          status: 200,
+          json: {},
+        };
+      }
+
+      throw new Error(`unexpected request ${url}`);
+    });
+    setRequestUrlMock(request);
+    vi.spyOn(SyncController.prototype, "readStoredConnection").mockResolvedValue(
+      storedConnection(),
+    );
+    vi.spyOn(SyncController.prototype, "initializeStore").mockResolvedValue();
+    vi.spyOn(SyncController.prototype, "ensureAutoSyncState").mockResolvedValue();
+    vi.spyOn(SyncController.prototype, "resetLocalSyncState").mockResolvedValue();
+    const detachLocalVaultFromServer = vi
+      .spyOn(SyncController.prototype, "detachLocalVaultFromServer")
+      .mockImplementation(async () => {
+        events.push("detach");
+      });
+    const controller = new SynchPluginController({
+      plugin,
+      refreshUi: vi.fn(),
+    });
+
+    await controller.initialize();
+    await controller.ensureAutoSyncState();
+    await controller.signOutDevice();
+
+    expect(detachLocalVaultFromServer).toHaveBeenCalledTimes(1);
+    expect(events).toEqual(["detach", "sign-out"]);
+    expect(controller.hasConnectedRemoteVault()).toBe(false);
+  });
+
   it("disconnects locally when the stored remote vault is no longer available", async () => {
     const plugin = await createConnectedPlugin();
     setRequestUrlMock(

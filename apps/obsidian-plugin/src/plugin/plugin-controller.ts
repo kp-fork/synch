@@ -474,6 +474,7 @@ export class SynchPluginController implements SynchSettingsController {
 
   async signOutDevice(): Promise<void> {
     try {
+      await this.remoteVaultController.disconnectRemoteVault();
       await this.authManager.signOutDevice();
     } finally {
       this.clearSubscriptionStatus();
