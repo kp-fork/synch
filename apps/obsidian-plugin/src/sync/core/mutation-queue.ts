@@ -1,4 +1,4 @@
-import { encryptSyncMetadata } from "./crypto";
+import { createSyncCryptoContext, type SyncCryptoContext } from "./crypto";
 import type { SyncMutationStore } from "../store/ports";
 import type { PendingMutationRow } from "../store/store";
 
@@ -73,17 +73,31 @@ export async function queueLocalUpsertMutation(
   store: PendingMutationWriter,
   input: QueueLocalUpsertMutationInput,
 ): Promise<QueuedLocalUpsertMutation> {
-  const queued = await buildLocalUpsertMutation(input);
-  await store.replaceDirtyEntry(queued.mutation, {
-    requireBaseBlob: input.requireBaseBlob,
-  });
+  const metadataCrypto = createSyncCryptoContext(input.remoteVaultKey);
+  try {
+    const queued = await buildLocalUpsertMutation({
+      ...input,
+      metadataCrypto,
+    });
+    await store.replaceDirtyEntry(queued.mutation, {
+      requireBaseBlob: input.requireBaseBlob,
+    });
 
-  return queued;
+    return queued;
+  } finally {
+    metadataCrypto.dispose();
+  }
 }
 
-export async function buildLocalUpsertMutation(
-  input: QueueLocalUpsertMutationInput,
-): Promise<QueuedLocalUpsertMutation> {
+export interface BuildLocalUpsertMutationInput
+  extends Omit<QueueLocalUpsertMutationInput, "remoteVaultKey"> {
+  metadataCrypto: Pick<SyncCryptoContext, "encryptMetadata">;
+}
+
+export async function buildLocalUpsertMutation({
+  metadataCrypto,
+  ...input
+}: BuildLocalUpsertMutationInput): Promise<QueuedLocalUpsertMutation> {
   const entryId = input.entryId;
   const baseRevision = input.base?.revision ?? 0;
   const blobId = createNextBlobId(input.previousLocal ?? input.base, input.hash);
@@ -96,8 +110,7 @@ export async function buildLocalUpsertMutation(
     baseHash: input.base?.hash ?? null,
     blobId,
     hash: input.hash,
-    encryptedMetadata: await encryptSyncMetadata(
-      input.remoteVaultKey,
+    encryptedMetadata: await metadataCrypto.encryptMetadata(
       {
         path: input.path,
         hash: input.hash,
@@ -130,14 +143,28 @@ export async function queueLocalDeleteMutation(
   store: PendingMutationWriter,
   input: QueueLocalDeleteMutationInput,
 ): Promise<PendingMutationRow> {
-  const mutation = await buildLocalDeleteMutation(input);
-  await store.replaceDirtyEntry(mutation);
-  return mutation;
+  const metadataCrypto = createSyncCryptoContext(input.remoteVaultKey);
+  try {
+    const mutation = await buildLocalDeleteMutation({
+      ...input,
+      metadataCrypto,
+    });
+    await store.replaceDirtyEntry(mutation);
+    return mutation;
+  } finally {
+    metadataCrypto.dispose();
+  }
 }
 
-export async function buildLocalDeleteMutation(
-  input: QueueLocalDeleteMutationInput,
-): Promise<PendingMutationRow> {
+export interface BuildLocalDeleteMutationInput
+  extends Omit<QueueLocalDeleteMutationInput, "remoteVaultKey"> {
+  metadataCrypto: Pick<SyncCryptoContext, "encryptMetadata">;
+}
+
+export async function buildLocalDeleteMutation({
+  metadataCrypto,
+  ...input
+}: BuildLocalDeleteMutationInput): Promise<PendingMutationRow> {
   return {
     mutationId: crypto.randomUUID(),
     entryId: input.entryId,
@@ -147,8 +174,7 @@ export async function buildLocalDeleteMutation(
     baseHash: input.base.hash,
     blobId: null,
     hash: null,
-    encryptedMetadata: await encryptSyncMetadata(
-      input.remoteVaultKey,
+    encryptedMetadata: await metadataCrypto.encryptMetadata(
       {
         path: input.path,
         hash: null,
