@@ -1,10 +1,13 @@
 import { describe, expect, it, vi } from "vitest";
+import { HTTPException } from "hono/http-exception";
 
+import { DomainError } from "../../../../errors";
 import type { SyncTokenService } from "../../../access/token-service";
 import type { BlobRepository } from "../../../blob/repository";
 import {
 	createCoordinatorService,
 	createMockCoordinatorStateRepository,
+	socketServiceMock,
 } from "./helpers";
 
 describe("coordinator blob lifecycle", () => {
@@ -48,5 +51,93 @@ describe("coordinator blob lifecycle", () => {
 		expect(stateRepository.readBlob).toHaveBeenCalledWith("blob-1");
 		expect(stateRepository.isBlobPinned).toHaveBeenCalledWith("blob-1", false);
 		expect(blobRepository.delete).not.toHaveBeenCalled();
+	});
+
+	it("maps blob staging domain failures without parsing error messages", async () => {
+		const syncTokenService = {
+			requireSyncToken: vi.fn(async () => ({
+				sub: "user-1",
+				vaultId: "vault-1",
+				localVaultId: "local-vault-1",
+				scope: "vault:sync" as const,
+				iat: 100,
+				exp: 200,
+			})),
+		} as unknown as SyncTokenService;
+		const stateRepository = createMockCoordinatorStateRepository({
+			stageBlob: vi.fn(async () => {
+				throw new DomainError("quota_exceeded", "storage limit reached");
+			}),
+		});
+		const service = createCoordinatorService({
+			syncTokenService,
+			stateRepository,
+			socketService: socketServiceMock(),
+		});
+
+		try {
+			await service.stageBlob(
+				new Request("http://example.com"),
+				"vault-1",
+				"blob-1",
+				42,
+			);
+			throw new Error("expected stageBlob to fail");
+		} catch (error) {
+			if (!(error instanceof HTTPException)) {
+				throw error;
+			}
+			const response = error.getResponse();
+			expect(response.status).toBe(413);
+			await expect(response.json()).resolves.toEqual({
+				error: "quota_exceeded",
+				reason: "quota_exceeded",
+				message: "storage limit reached",
+			});
+		}
+	});
+
+	it("preserves the existing conflict response code for blob conflicts", async () => {
+		const syncTokenService = {
+			requireSyncToken: vi.fn(async () => ({
+				sub: "user-1",
+				vaultId: "vault-1",
+				localVaultId: "local-vault-1",
+				scope: "vault:sync" as const,
+				iat: 100,
+				exp: 200,
+			})),
+		} as unknown as SyncTokenService;
+		const stateRepository = createMockCoordinatorStateRepository({
+			stageBlob: vi.fn(async () => {
+				throw new DomainError("blob_size_changed", "blob changed size");
+			}),
+		});
+		const service = createCoordinatorService({
+			syncTokenService,
+			stateRepository,
+			socketService: socketServiceMock(),
+		});
+
+		try {
+			await service.stageBlob(
+				new Request("http://example.com"),
+				"vault-1",
+				"blob-1",
+				42,
+			);
+			throw new Error("expected stageBlob to fail");
+		} catch (error) {
+			if (!(error instanceof HTTPException)) {
+				throw error;
+			}
+			const response = error.getResponse();
+			expect(response.status).toBe(409);
+			await expect(response.json()).resolves.toEqual({
+				error: "conflict",
+				reason: "blob_size_changed",
+				message: "blob changed size",
+			});
+		}
 	});
 });

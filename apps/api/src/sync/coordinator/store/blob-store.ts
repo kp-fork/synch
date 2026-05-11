@@ -2,6 +2,7 @@ import { and, eq, sql } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/durable-sqlite";
 
 import * as doSchema from "../../../db/do";
+import { DomainError } from "../../../errors";
 import type { BlobRow, BlobState } from "../types";
 
 type BlobDb = Pick<
@@ -30,14 +31,19 @@ export class CoordinatorBlobStore {
 				.limit(1)
 				.get();
 			if (!storage) {
-				throw new Error("vault sync state is not initialized");
+				throw new DomainError(
+					"sync_state_uninitialized",
+					"vault sync state is not initialized",
+				);
 			}
 
 			const storageLimitBytes = Number(storage.storageLimitBytes);
 			const maxFileSizeBytes = Number(storage.maxFileSizeBytes);
 			if (maxFileSizeBytes > 0 && sizeBytes > maxFileSizeBytes) {
-				throw new Error(
+				throw new DomainError(
+					"file_too_large",
 					`blob exceeds maximum file size of ${maxFileSizeBytes} bytes`,
+					{ maxFileSizeBytes, sizeBytes },
 				);
 			}
 
@@ -52,10 +58,16 @@ export class CoordinatorBlobStore {
 				.get();
 
 			if (existing && this.isBlobPinned(blobId, false, now)) {
-				throw new Error(`blob ${blobId} is already live`);
+				throw new DomainError("blob_already_live", `blob ${blobId} is already live`, {
+					blobId,
+				});
 			}
 			if (existing && Number(existing.sizeBytes) !== sizeBytes) {
-				throw new Error(`blob ${blobId} size changed between staged uploads`);
+				throw new DomainError(
+					"blob_size_changed",
+					`blob ${blobId} size changed between staged uploads`,
+					{ blobId, previousSizeBytes: Number(existing.sizeBytes), sizeBytes },
+				);
 			}
 
 			if (!existing) {
@@ -64,8 +76,10 @@ export class CoordinatorBlobStore {
 					storageLimitBytes > 0 &&
 					usedBytes + sizeBytes > storageLimitBytes
 				) {
-					throw new Error(
+					throw new DomainError(
+						"quota_exceeded",
 						`vault storage quota exceeded: ${usedBytes + sizeBytes}/${storageLimitBytes} bytes`,
+						{ storageLimitBytes, sizeBytes, usedBytes },
 					);
 				}
 

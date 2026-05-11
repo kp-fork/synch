@@ -1,4 +1,4 @@
-import { apiError } from "../../../errors";
+import { DomainError, domainApiError } from "../../../errors";
 import type { SyncTokenService } from "../../access/token-service";
 import { blobObjectKey } from "../../blob/object-key";
 import type { BlobRepository } from "../../blob/repository";
@@ -42,20 +42,8 @@ export class BlobSyncService {
 			await this.deferMaintenance("blob_gc", now + this.blobGracePeriodMs, now);
 			this.broadcastStorageStatus();
 		} catch (error) {
-			if (error instanceof Error && error.message.includes("not initialized")) {
-				throw apiError(409, "sync_state_uninitialized", error.message);
-			}
-			if (error instanceof Error && error.message.includes("maximum file size")) {
-				throw apiError(413, "file_too_large", error.message);
-			}
-			if (error instanceof Error && error.message.includes("already live")) {
-				throw apiError(409, "conflict", error.message);
-			}
-			if (error instanceof Error && error.message.includes("quota exceeded")) {
-				throw apiError(413, "quota_exceeded", error.message);
-			}
-			if (error instanceof Error && error.message.includes("size changed")) {
-				throw apiError(409, "conflict", error.message);
+			if (error instanceof DomainError) {
+				throw domainApiError(error);
 			}
 			throw error;
 		}
