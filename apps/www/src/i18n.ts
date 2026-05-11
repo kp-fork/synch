@@ -25,16 +25,17 @@ export function getLocale(locale?: string): Locale {
 
 export function localizedPath(locale: Locale, path = "/") {
 	const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+	const normalizedPagePath = normalizedPath.endsWith("/") ? normalizedPath : `${normalizedPath}/`;
 
 	if (locale === defaultLocale) {
-		return normalizedPath;
+		return normalizedPagePath;
 	}
 
-	if (normalizedPath === "/") {
-		return `/${locale}`;
+	if (normalizedPagePath === "/") {
+		return `/${locale}/`;
 	}
 
-	return `/${locale}${normalizedPath}`;
+	return `/${locale}${normalizedPagePath}`;
 }
 
 export function unlocalizedPath(pathname: string) {

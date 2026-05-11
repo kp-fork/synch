@@ -1,6 +1,5 @@
 ---
-import { getRelativeLocaleUrl } from "astro:i18n";
-import { getLocale, ui, type Locale, locales } from "../i18n";
+import { getLocale, localizedPath, ui, type Locale, locales } from "../i18n";
 
 interface Props {
   locale?: Locale;
@@ -34,13 +33,13 @@ const routePath = Astro.url.pathname
       aria-label="Select language"
     >
       {locales.map((l) => (
-        <option value={getRelativeLocaleUrl(l, routePath || undefined)} selected={l === locale} class="bg-[#0a0a0a] text-zinc-400">
+        <option value={localizedPath(l, routePath || "/")} selected={l === locale} class="bg-[#0a0a0a] text-zinc-400">
           {localeLabels[l]}
         </option>
       ))}
     </select>
-    <a href={getRelativeLocaleUrl(locale, "blog")} class="hover:text-zinc-400 transition-colors">{t.blog}</a>
-    <a href="/terms" class="hover:text-zinc-400 transition-colors">{t.terms}</a>
-    <a href="/privacy" class="hover:text-zinc-400 transition-colors">{t.privacy}</a>
+    <a href={localizedPath(locale, "/blog")} class="hover:text-zinc-400 transition-colors">{t.blog}</a>
+    <a href="/terms/" class="hover:text-zinc-400 transition-colors">{t.terms}</a>
+    <a href="/privacy/" class="hover:text-zinc-400 transition-colors">{t.privacy}</a>
   </nav>
 </footer>
