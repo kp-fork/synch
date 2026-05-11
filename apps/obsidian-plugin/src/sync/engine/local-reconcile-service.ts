@@ -66,7 +66,10 @@ export class SyncLocalReconcileService {
     metadataCrypto: Pick<SyncCryptoContext, "encryptMetadata" | "decryptMetadata">,
   ): Promise<ReconcileOnceResult> {
     const localFiles = await this.deps.scanner.listFiles();
-    const localPaths = new Set(localFiles.map((file) => file.path));
+    const localPaths = new Set<string>();
+    for (const file of localFiles) {
+      localPaths.add(file.path);
+    }
     const snapshot = await store.listReconcileEntryStates();
     const { retained, cleanupUpdates } = this.filterKnownEntries(snapshot);
     const localByPath = indexLocalEntriesByPath(retained);
@@ -82,7 +85,11 @@ export class SyncLocalReconcileService {
     let filesQueuedForUpsert = 0;
     let filesQueuedForDelete = 0;
 
-    for (const entry of retained.flatMap((state) => state.local ?? [])) {
+    for (const state of retained) {
+      const entry = state.local;
+      if (!entry) {
+        continue;
+      }
       if (entry.deleted || !entry.path || localPaths.has(entry.path) || !entry.hash) {
         continue;
       }
@@ -184,7 +191,11 @@ export class SyncLocalReconcileService {
       filesQueuedForUpsert += 1;
     }
 
-    for (const entry of retained.flatMap((state) => state.local ?? [])) {
+    for (const state of retained) {
+      const entry = state.local;
+      if (!entry) {
+        continue;
+      }
       if (
         entry.deleted ||
         !entry.path ||
