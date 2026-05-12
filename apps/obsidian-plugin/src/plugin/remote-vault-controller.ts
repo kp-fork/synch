@@ -1,5 +1,6 @@
 import type { Plugin } from "obsidian";
 
+import { getSynchLocale } from "../i18n";
 import { RemoteVaultManager } from "../remote-vault/manager";
 import {
   openBootstrapRemoteVaultModal,
@@ -82,8 +83,9 @@ export class SynchRemoteVaultController {
   }
 
   openRemoteVaultManagementPage(): void {
-    const url = new URL("/vaults", this.deps.getApiBaseUrl()).toString();
-    window.open(url, "_blank", "noopener,noreferrer");
+    const url = new URL("/vaults", this.deps.getApiBaseUrl());
+    url.searchParams.set("lang", getSynchLocale());
+    window.open(url.toString(), "_blank", "noopener,noreferrer");
   }
 
   async disconnectRemoteVault(): Promise<void> {
