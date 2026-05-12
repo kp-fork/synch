@@ -6,6 +6,8 @@ Synch는 종단 간 암호화된 볼트 동기화를 위한 Obsidian Sync 대안
 Synch는 독립적인 커뮤니티 플러그인 및 서비스입니다. Obsidian과 제휴되어
 있지 않습니다.
 
+웹사이트: [https://synch.run/ko](https://synch.run/ko)
+
 번역: [English](../../README.md) · [日本語](README.ja.md) ·
 [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md)
 

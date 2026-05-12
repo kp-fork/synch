@@ -6,6 +6,8 @@ It is currently in beta.
 Synch is an independent community plugin and service. It is not affiliated with
 Obsidian.
 
+Website: [https://synch.run](https://synch.run)
+
 Translations: [한국어](docs/i18n/README.ko.md) ·
 [日本語](docs/i18n/README.ja.md) ·
 [简体中文](docs/i18n/README.zh-CN.md) ·
