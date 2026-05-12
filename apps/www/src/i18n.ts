@@ -111,8 +111,8 @@ export const ui = {
 			viewSource: "View Source",
 			features: [
 				{
-					title: "End-to-end encryption",
-					body: "Your vault is encrypted on your device before upload. Synch stores encrypted data, not readable notes.",
+					title: "Sync in 3 seconds",
+					body: "Synch checks for changes frequently so edits can move between devices in just a few seconds.",
 				},
 				{
 					title: "Version history",
@@ -123,8 +123,8 @@ export const ui = {
 					body: "Bring back deleted notes and attachments while they are still kept in version history.",
 				},
 				{
-					title: "Sync in 3 seconds",
-					body: "Synch checks for changes frequently so edits can move between devices in just a few seconds.",
+					title: "Automatic conflict merges",
+					body: "When the same note changes on multiple devices, Synch uses a 3-way merge to combine compatible edits automatically.",
 				},
 			],
 			installTitle: "How to Install",
@@ -157,7 +157,6 @@ export const ui = {
 			year: "/ year",
 			monthly: "Monthly",
 			annual: "Annual",
-			earlyAccessBadge: "Early adopter",
 			comingSoon: "Coming Soon",
 			features: {
 				oneVault: "1 synced vault",
@@ -268,8 +267,8 @@ export const ui = {
 			viewSource: "소스 보기",
 			features: [
 				{
-					title: "종단 간 암호화",
-					body: "vault는 업로드 전에 기기에서 먼저 암호화됩니다. Synch는 읽을 수 있는 노트가 아니라 암호화된 데이터만 저장합니다.",
+					title: "3초 안에 동기화",
+					body: "Synch는 변경 사항을 자주 확인해 편집 내용이 몇 초 안에 다른 기기로 이동할 수 있게 합니다.",
 				},
 				{
 					title: "버전 히스토리",
@@ -280,8 +279,8 @@ export const ui = {
 					body: "삭제한 노트와 첨부 파일도 버전 히스토리에 남아 있는 동안 다시 가져올 수 있습니다.",
 				},
 				{
-					title: "3초 안에 동기화",
-					body: "Synch는 변경 사항을 자주 확인해 편집 내용이 몇 초 안에 다른 기기로 이동할 수 있게 합니다.",
+					title: "충돌 자동 병합",
+					body: "여러 기기에서 같은 노트가 바뀌면 Synch가 3-way merge로 호환되는 편집 내용을 자동 병합합니다.",
 				},
 			],
 			installTitle: "설치 방법",
@@ -314,7 +313,6 @@ export const ui = {
 			year: "/ 년",
 			monthly: "월간",
 			annual: "연간",
-			earlyAccessBadge: "얼리어답터 한정",
 			comingSoon: "준비 중",
 			features: {
 				oneVault: "vault 1개 동기화",
@@ -425,8 +423,8 @@ export const ui = {
 			viewSource: "ソースを見る",
 			features: [
 				{
-					title: "エンドツーエンド暗号化",
-					body: "vaultはアップロード前に端末上で暗号化されます。Synchが保存するのは読めるノートではなく、暗号化されたデータです。",
+					title: "3秒で同期",
+					body: "Synchは変更をこまめに確認し、編集内容を数秒で別の端末へ届けられるようにします。",
 				},
 				{
 					title: "バージョン履歴",
@@ -437,8 +435,8 @@ export const ui = {
 					body: "削除したノートや添付ファイルも、バージョン履歴に残っている間は取り戻せます。",
 				},
 				{
-					title: "3秒で同期",
-					body: "Synchは変更をこまめに確認し、編集内容を数秒で別の端末へ届けられるようにします。",
+					title: "競合の自動マージ",
+					body: "複数の端末で同じノートが変更された場合、Synchは3-way mergeで互換性のある編集を自動的に統合します。",
 				},
 			],
 			installTitle: "インストール方法",
@@ -471,7 +469,6 @@ export const ui = {
 			year: "/ 年",
 			monthly: "月額",
 			annual: "年額",
-			earlyAccessBadge: "早期ユーザー限定",
 			comingSoon: "近日公開",
 			features: {
 				oneVault: "同期vault 1個",
@@ -582,8 +579,8 @@ export const ui = {
 			viewSource: "查看源码",
 			features: [
 				{
-					title: "端到端加密",
-					body: "vault 会先在你的设备上加密再上传。Synch 存储的是加密数据，而不是可读取的笔记。",
+					title: "3 秒同步",
+					body: "Synch 会频繁检查更改，让编辑内容可在几秒内同步到其他设备。",
 				},
 				{
 					title: "版本历史",
@@ -594,8 +591,8 @@ export const ui = {
 					body: "已删除的笔记和附件只要仍保留在版本历史中，就可以找回。",
 				},
 				{
-					title: "3 秒同步",
-					body: "Synch 会频繁检查更改，让编辑内容可在几秒内同步到其他设备。",
+					title: "自动合并冲突",
+					body: "当同一篇笔记在多台设备上被修改时，Synch 会使用 3-way merge 自动合并兼容的编辑。",
 				},
 			],
 			installTitle: "如何安装",
@@ -628,7 +625,6 @@ export const ui = {
 			year: "/ 年",
 			monthly: "月付",
 			annual: "年付",
-			earlyAccessBadge: "早期用户价",
 			comingSoon: "即将推出",
 			features: {
 				oneVault: "1 个同步 vault",
@@ -739,8 +735,8 @@ export const ui = {
 			viewSource: "查看原始碼",
 			features: [
 				{
-					title: "端對端加密",
-					body: "vault 會先在你的裝置上加密再上傳。Synch 儲存的是加密資料，而不是可讀取的筆記。",
+					title: "3 秒同步",
+					body: "Synch 會頻繁檢查變更，讓編輯內容可在幾秒內同步到其他裝置。",
 				},
 				{
 					title: "版本記錄",
@@ -751,8 +747,8 @@ export const ui = {
 					body: "已刪除的筆記和附件只要仍保留在版本記錄中，就可以找回。",
 				},
 				{
-					title: "3 秒同步",
-					body: "Synch 會頻繁檢查變更，讓編輯內容可在幾秒內同步到其他裝置。",
+					title: "自動合併衝突",
+					body: "當同一篇筆記在多台裝置上被修改時，Synch 會使用 3-way merge 自動合併相容的編輯。",
 				},
 			],
 			installTitle: "如何安裝",
@@ -785,7 +781,6 @@ export const ui = {
 			year: "/ 年",
 			monthly: "月付",
 			annual: "年付",
-			earlyAccessBadge: "早期用戶價",
 			comingSoon: "即將推出",
 			features: {
 				oneVault: "1 個同步 vault",
