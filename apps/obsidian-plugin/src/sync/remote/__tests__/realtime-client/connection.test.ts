@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { SyncRealtimeError } from "../../realtime-client";
 import {
   createMutation,
   openRealtimeSession,
@@ -121,6 +122,40 @@ describe("SyncRealtimeClient connection health", () => {
     await expect(commitPromise).rejects.toThrow("send failed");
     expect(errors).toEqual([]);
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports local vault replacement from the websocket close code", async () => {
+    const errors: Error[] = [];
+    const onClose = vi.fn();
+    const { socket, session } = await openRealtimeSession({
+      callbacks: {
+        onClose,
+        onError(error) {
+          errors.push(error);
+        },
+      },
+    });
+
+    const commitPromise = session.commitMutation(createMutation());
+    socket.emit("close", {
+      code: 4409,
+      reason: "superseded by newer connection",
+    });
+
+    await expect(commitPromise).rejects.toMatchObject({
+      code: "local_vault_replaced",
+      message: "superseded by newer connection",
+    });
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toBeInstanceOf(SyncRealtimeError);
+    expect(errors[0]).toMatchObject({
+      code: "local_vault_replaced",
+      message: "superseded by newer connection",
+    });
+    expect(onClose).toHaveBeenCalledWith({
+      code: 4409,
+      reason: "superseded by newer connection",
+    });
   });
 
   it("uses heartbeat messages to detect a stale websocket", async () => {

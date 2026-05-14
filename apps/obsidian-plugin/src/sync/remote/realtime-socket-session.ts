@@ -90,6 +90,7 @@ export class SyncRealtimeSocketSession {
   private readonly pendingRequests = new Map<string, PendingRequest>();
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private closed = false;
+  private receivedSessionError = false;
   private nextRequestId = 0;
 
   constructor(
@@ -237,6 +238,7 @@ export class SyncRealtimeSocketSession {
     }
 
     if (parsed.type === "session_error") {
+      this.receivedSessionError = true;
       const error = new SyncRealtimeError(parsed.code, parsed.message);
       this.rejectPending(error);
       this.callbacks.onError(error);
@@ -282,11 +284,16 @@ export class SyncRealtimeSocketSession {
 
     this.closed = true;
     this.stopHeartbeat();
+    const sessionError = syncRealtimeErrorFromCloseEvent(event);
     this.rejectPending(
-      new SyncRealtimeConnectionError(
-        "sync websocket closed before the request completed",
-      ),
+      sessionError ??
+        new SyncRealtimeConnectionError(
+          "sync websocket closed before the request completed",
+        ),
     );
+    if (sessionError && !this.receivedSessionError) {
+      this.callbacks.onError(sessionError);
+    }
     this.callbacks.onClose({
       code: event.code,
       reason: event.reason,
@@ -389,6 +396,12 @@ export async function waitForOpen(
         return;
       }
 
+      const sessionError = syncRealtimeErrorFromCloseEvent(event);
+      if (sessionError) {
+        reject(sessionError);
+        return;
+      }
+
       reject(
         new SyncRealtimeConnectionError(
           "sync websocket closed before the session started",
@@ -420,4 +433,18 @@ function toConnectionError(error: unknown): SyncRealtimeConnectionError {
 
 function toErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
+}
+
+function syncRealtimeErrorFromCloseEvent(event: {
+  code: number;
+  reason: string;
+}): SyncRealtimeError | null {
+  if (event.code !== 4409) {
+    return null;
+  }
+
+  return new SyncRealtimeError(
+    "local_vault_replaced",
+    event.reason || "connection replaced by a newer sync session for this local vault",
+  );
 }

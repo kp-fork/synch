@@ -74,13 +74,13 @@ export class CoordinatorSocketService {
 					code: "local_vault_replaced",
 					message: "connection replaced by a newer sync session for this local vault",
 				});
-				socket.close(4409, "superseded by newer connection");
+				this.closeSocket(socket, 4409, "superseded by newer connection");
 			}
 		}
 	}
 
-	sendSocketMessage(ws: WebSocket, message: ServerControlMessage): void {
-		ws.send(JSON.stringify(message));
+	sendSocketMessage(ws: WebSocket, message: ServerControlMessage): boolean {
+		return this.trySend(ws, JSON.stringify(message));
 	}
 
 	broadcastStorageStatus(message: StorageStatusUpdatedMessage): void {
@@ -90,14 +90,14 @@ export class CoordinatorSocketService {
 			if (!session?.wantsStorageStatus) {
 				continue;
 			}
-			socket.send(encoded);
+			this.trySend(socket, encoded);
 		}
 	}
 
 	broadcastPolicyUpdated(message: PolicyUpdatedMessage): void {
 		const encoded = JSON.stringify(message);
 		for (const socket of this.ctx.getWebSockets()) {
-			socket.send(encoded);
+			this.trySend(socket, encoded);
 		}
 	}
 
@@ -107,13 +107,47 @@ export class CoordinatorSocketService {
 			if (socket === excluded) {
 				continue;
 			}
-			socket.send(encoded);
+			this.trySend(socket, encoded);
 		}
 	}
 
 	closeAllSockets(code: number, reason: string): void {
 		for (const socket of this.ctx.getWebSockets()) {
+			this.closeSocket(socket, code, reason);
+		}
+	}
+
+	private trySend(socket: WebSocket, encoded: string): boolean {
+		if (socket.readyState !== WebSocket.OPEN) {
+			return false;
+		}
+
+		try {
+			socket.send(encoded);
+			return true;
+		} catch (error) {
+			if (isClosedWebSocketSendError(error)) {
+				return false;
+			}
+			throw error;
+		}
+	}
+
+	private closeSocket(socket: WebSocket, code: number, reason: string): void {
+		if (
+			socket.readyState === WebSocket.CLOSING ||
+			socket.readyState === WebSocket.CLOSED
+		) {
+			return;
+		}
+
+		try {
 			socket.close(code, reason);
+		} catch (error) {
+			if (isClosedWebSocketCloseError(error)) {
+				return;
+			}
+			throw error;
 		}
 	}
 
@@ -139,4 +173,18 @@ export class CoordinatorSocketService {
 			wantsStorageStatus: maybeSession.wantsStorageStatus === true,
 		};
 	}
+}
+
+function isClosedWebSocketSendError(error: unknown): boolean {
+	return (
+		error instanceof TypeError &&
+		/after close|closed|closing/i.test(error.message)
+	);
+}
+
+function isClosedWebSocketCloseError(error: unknown): boolean {
+	return (
+		error instanceof TypeError &&
+		/already.*closed|closed|closing/i.test(error.message)
+	);
 }

@@ -107,6 +107,8 @@ export async function waitForSentMessage(
 
 type MockEvent = {
   data?: string;
+  code?: number;
+  reason?: string;
 };
 
 export class MockWebSocket {
