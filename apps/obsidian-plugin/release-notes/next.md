@@ -6,6 +6,7 @@
 
 ## Changed
 
+- Expand Japanese and Chinese translations across plugin settings, status, version history, deleted files, and vault management.
 - Stop packaging `versions.json` inside the downloadable plugin release assets.
 - Show a confirmation after saving a self-hosted server URL.
 
