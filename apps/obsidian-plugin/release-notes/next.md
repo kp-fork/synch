@@ -3,6 +3,7 @@
 ## Added
 
 - Add opt-in syncing for selected hidden folders.
+- Add opt-in vault configuration sync for selected Obsidian settings, themes, snippets, and community plugin files.
 
 ## Changed
 
