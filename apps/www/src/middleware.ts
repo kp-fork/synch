@@ -1,14 +1,21 @@
 import { defineMiddleware } from "astro:middleware";
 
+const canonicalHost = "synch.run";
+
 const localeRedirects = [
 	{ path: null, matches: ["en"] },
-	{ path: "/ko", matches: ["ko"] },
-	{ path: "/ja", matches: ["ja"] },
-	{ path: "/zh-tw", matches: ["zh-tw", "zh-hk", "zh-mo", "zh-hant"] },
-	{ path: "/zh-cn", matches: ["zh", "zh-cn", "zh-sg", "zh-my", "zh-hans"] },
+	{ path: "/ko/", matches: ["ko"] },
+	{ path: "/ja/", matches: ["ja"] },
+	{ path: "/zh-tw/", matches: ["zh-tw", "zh-hk", "zh-mo", "zh-hant"] },
+	{ path: "/zh-cn/", matches: ["zh", "zh-cn", "zh-sg", "zh-my", "zh-hans"] },
 ] as const;
 
 export const onRequest = defineMiddleware(async (context, next) => {
+	const canonicalUrl = canonicalRedirectUrl(context.url);
+	if (canonicalUrl) {
+		return context.redirect(canonicalUrl.toString(), 301);
+	}
+
 	if (context.url.pathname !== "/") {
 		return next();
 	}
@@ -30,6 +37,41 @@ export const onRequest = defineMiddleware(async (context, next) => {
 	response.headers.append("Vary", "Accept-Language");
 	return response;
 });
+
+function canonicalRedirectUrl(url: URL): URL | null {
+	const nextUrl = new URL(url);
+	let changed = false;
+
+	if (nextUrl.hostname === `www.${canonicalHost}`) {
+		nextUrl.hostname = canonicalHost;
+		changed = true;
+	}
+
+	if (!isLocalHost(nextUrl.hostname) && nextUrl.protocol !== "https:") {
+		nextUrl.protocol = "https:";
+		changed = true;
+	}
+
+	if (shouldHaveTrailingSlash(nextUrl.pathname) && !nextUrl.pathname.endsWith("/")) {
+		nextUrl.pathname = `${nextUrl.pathname}/`;
+		changed = true;
+	}
+
+	return changed ? nextUrl : null;
+}
+
+function isLocalHost(hostname: string): boolean {
+	return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "[::1]";
+}
+
+function shouldHaveTrailingSlash(pathname: string): boolean {
+	if (pathname === "/") {
+		return false;
+	}
+
+	const lastSegment = pathname.split("/").at(-1) ?? "";
+	return !lastSegment.includes(".");
+}
 
 function preferredLocalePath(acceptLanguage: string | null): string | null {
 	for (const language of parseAcceptLanguage(acceptLanguage)) {

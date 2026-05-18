@@ -37,6 +37,9 @@ const {
 } = Astro.props;
 const siteUrl = Astro.site ?? Astro.url.origin;
 const canonicalUrl = new URL(Astro.url.pathname, siteUrl);
+if (canonicalUrl.pathname !== "/" && !canonicalUrl.pathname.endsWith("/")) {
+	canonicalUrl.pathname = `${canonicalUrl.pathname}/`;
+}
 const ogImageUrl = new URL("/og.png", Astro.site ?? Astro.url.origin);
 const alternateLinks =
 	alternatePath === false
