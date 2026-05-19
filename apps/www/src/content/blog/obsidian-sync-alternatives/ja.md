@@ -1,6 +1,6 @@
 ---
-title: "Obsidian Sync代替6選を比較: 無料、プライベート、セルフホスト"
-description: "Obsidian Sync、クラウドドライブ、Remotely Save、Self-hosted LiveSync、Syncthing、Git、Synchを実用面から比較します。"
+title: "2026年に選びたいObsidian Syncの代替案"
+description: "iCloud、Syncthing、Remotely Save、LiveSync、Git、Synchを、料金、プライバシー、モバイルでの使いやすさ、設定の手間で比較します。"
 pubDate: 2026-05-08
 ---
 

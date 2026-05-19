@@ -1,6 +1,6 @@
 ---
-title: "6 Obsidian Sync Alternatives Compared: Free, Private, and Self-Hosted"
-description: "A practical comparison of Obsidian Sync, cloud drives, Remotely Save, Self-hosted LiveSync, Syncthing, Git, and Synch."
+title: "Best Obsidian Sync Alternatives in 2026"
+description: "Compare Obsidian Sync alternatives including iCloud, Syncthing, Remotely Save, LiveSync, Git, and Synch by price, privacy, mobile support, and setup."
 pubDate: 2026-05-08
 ---
 

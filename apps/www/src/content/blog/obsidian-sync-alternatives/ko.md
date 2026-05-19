@@ -1,6 +1,6 @@
 ---
-title: "Obsidian Sync 대안 6가지 비교: 무료, 프라이빗, 셀프 호스팅"
-description: "Obsidian Sync, 클라우드 드라이브, Remotely Save, Self-hosted LiveSync, Syncthing, Git, Synch를 현실적으로 비교합니다."
+title: "2026년에 고를 만한 Obsidian Sync 대안"
+description: "iCloud, Syncthing, Remotely Save, LiveSync, Git, Synch를 비용, 개인정보 보호, 모바일 사용성, 설정 난이도 기준으로 비교합니다."
 pubDate: 2026-05-08
 ---
 

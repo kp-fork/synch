@@ -1,6 +1,6 @@
 ---
-title: "6 個 Obsidian Sync 替代方案比較：免費、私密、自架"
-description: "從實際使用角度比較 Obsidian Sync、雲端硬碟、Remotely Save、Self-hosted LiveSync、Syncthing、Git 與 Synch。"
+title: "2026 年值得考慮的 Obsidian Sync 替代方案"
+description: "從費用、隱私、行動端體驗和設定難度出發，比較 iCloud、Syncthing、Remotely Save、LiveSync、Git、Synch。"
 pubDate: 2026-05-08
 ---
 
