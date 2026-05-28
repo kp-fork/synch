@@ -70,23 +70,53 @@ export function renderApiBaseUrlSetting(
     canChangeApiBaseUrl: boolean;
     hasConnectedRemoteVault: boolean;
     isDeviceLoginInProgress: boolean;
+    showSelfHostedServerUrl: boolean;
+    onShowSelfHostedServerUrlChange(value: boolean): void;
   },
 ): void {
   const apiBaseUrl = controller.getApiBaseUrl();
   const visibleApiBaseUrl = apiBaseUrl === getDefaultApiBaseUrl() ? "" : apiBaseUrl;
   let apiBaseUrlInput = visibleApiBaseUrl;
+  const serverDescription = options.isDeviceLoginInProgress
+    ? t("server.descFinishSignIn")
+    : options.hasConnectedRemoteVault
+      ? t("server.descDisconnectVault")
+      : t("server.descDefault");
+
+  new Setting(containerEl)
+    .setName(t("server.mode"))
+    .setDesc(serverDescription)
+    .addToggle((toggle) =>
+      toggle
+        .setValue(options.showSelfHostedServerUrl)
+        .setDisabled(!options.canChangeApiBaseUrl)
+        .onChange(async (value) => {
+          if (value) {
+            options.onShowSelfHostedServerUrlChange(true);
+            return;
+          }
+
+          try {
+            await controller.updateApiBaseUrl("");
+            new Notice(t("server.savedCloud"));
+            options.onShowSelfHostedServerUrlChange(false);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(message);
+          }
+        }),
+    );
+
+  if (!options.showSelfHostedServerUrl) {
+    return;
+  }
+
   new Setting(containerEl)
     .setName(t("server.url"))
-    .setDesc(
-      options.isDeviceLoginInProgress
-        ? t("server.descFinishSignIn")
-        : options.hasConnectedRemoteVault
-          ? t("server.descDisconnectVault")
-          : t("server.descDefault"),
-    )
+    .setDesc(t("server.urlDesc"))
     .addText((text) =>
       text
-        .setPlaceholder(t("server.default"))
+        .setPlaceholder(t("server.placeholder"))
         .setValue(visibleApiBaseUrl)
         .setDisabled(!options.canChangeApiBaseUrl)
         .onChange((value) => {
@@ -101,6 +131,9 @@ export function renderApiBaseUrlSetting(
           try {
             await controller.updateApiBaseUrl(apiBaseUrlInput);
             new Notice(t("server.saved"));
+            options.onShowSelfHostedServerUrlChange(
+              controller.getApiBaseUrl() !== getDefaultApiBaseUrl(),
+            );
           } catch (error) {
             const message = error instanceof Error ? error.message : String(error);
             new Notice(message);

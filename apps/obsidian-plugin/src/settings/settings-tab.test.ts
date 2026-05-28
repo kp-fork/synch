@@ -11,6 +11,7 @@ import {
   getSettingDescriptions,
   getSettingNames,
   getTextComponents,
+  getToggleComponents,
   resetObsidianMocks,
 } from "../test-stubs/obsidian";
 import { createSettingsTab } from "./__tests__/settings-tab-helpers";
@@ -44,7 +45,7 @@ describe("SynchSettingTab", () => {
     expect(signInButton?.disabled).toBe(false);
   });
 
-  it("shows account before self-hosted server settings before sign-in", () => {
+  it("shows account before server settings before sign-in", () => {
     const tab = createSettingsTab({
       hasAuthenticatedSession: () => false,
     });
@@ -56,10 +57,11 @@ describe("SynchSettingTab", () => {
       "Synch",
       "Account",
       "Authentication",
-      "Self-hosted server",
-      "Server URL",
+      "Server",
+      "Use a self-hosted server",
     ]);
-    expect(buttonTexts).toEqual(["Sign in on this device", "Save"]);
+    expect(buttonTexts).toEqual(["Sign in on this device"]);
+    expect(getToggleComponents()[0]?.value).toBe(false);
     expect(getProgressBarComponents()).toEqual([]);
   });
 
@@ -169,7 +171,7 @@ describe("SynchSettingTab", () => {
     expect(getButtonComponents()[0]?.text).toBe("Sign in on this device");
   });
 
-  it("shows an editable self-hosted server URL before sign-in", async () => {
+  it("shows an editable self-hosted server URL before sign-in when already configured", async () => {
     const updateApiBaseUrl = vi.fn(async () => {});
     const tab = createSettingsTab({
       getApiBaseUrl: () => "https://api.synch.test",
@@ -178,6 +180,7 @@ describe("SynchSettingTab", () => {
 
     tab.display();
 
+    expect(getToggleComponents()[0]?.value).toBe(true);
     const apiBaseUrlInput = getTextComponents()[0];
     expect(apiBaseUrlInput?.value).toBe("https://api.synch.test");
     expect(apiBaseUrlInput?.disabled).toBe(false);
@@ -222,12 +225,10 @@ describe("SynchSettingTab", () => {
 
     tab.display();
 
-    const apiBaseUrlInput = getTextComponents()[0];
-    expect(apiBaseUrlInput?.value).toBe("");
-    expect(apiBaseUrlInput?.placeholder).toBe("Synch Cloud");
-
-    await getButtonComponents()[1]?.click();
-    expect(updateApiBaseUrl).toHaveBeenCalledWith("");
+    expect(getToggleComponents()[0]?.value).toBe(false);
+    expect(getTextComponents()).toEqual([]);
+    expect(getButtonComponents().map((button) => button.text)).not.toContain("Save");
+    expect(updateApiBaseUrl).not.toHaveBeenCalled();
   });
 
   it("hides the self-hosted server URL after sign-in", () => {
@@ -240,7 +241,7 @@ describe("SynchSettingTab", () => {
 
     tab.display();
 
-    expect(getSettingNames()).not.toContain("Server URL");
+    expect(getSettingNames()).not.toContain("Self-hosted server URL");
     expect(getTextComponents()).toEqual([]);
     expect(getButtonComponents().map((button) => button.text)).not.toContain("Save");
     expect(updateApiBaseUrl).not.toHaveBeenCalled();
@@ -378,6 +379,7 @@ describe("SynchSettingTab", () => {
 
     tab.display();
 
+    expect(getToggleComponents()[0]?.disabled).toBe(true);
     const apiBaseUrlInput = getTextComponents()[0];
     const saveButton = getButtonComponents()[1];
     expect(apiBaseUrlInput?.disabled).toBe(true);
@@ -399,6 +401,7 @@ describe("SynchSettingTab", () => {
 
     tab.display();
 
+    expect(getToggleComponents()[0]?.disabled).toBe(true);
     const apiBaseUrlInput = getTextComponents()[0];
     const saveButton = getButtonComponents()[1];
     expect(apiBaseUrlInput?.disabled).toBe(true);

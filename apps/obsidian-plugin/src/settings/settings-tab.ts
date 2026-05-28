@@ -19,6 +19,7 @@ import {
 export class SynchSettingTab extends PluginSettingTab {
   private isVisible = false;
   private syncStatusControls: SyncStatusSettingControls | null = null;
+  private showSelfHostedServerUrl: boolean | null = null;
 
   constructor(
     app: App,
@@ -123,6 +124,12 @@ export class SynchSettingTab extends PluginSettingTab {
         canChangeApiBaseUrl,
         hasConnectedRemoteVault,
         isDeviceLoginInProgress,
+        showSelfHostedServerUrl:
+          this.showSelfHostedServerUrl ?? !usesDefaultApiBaseUrl,
+        onShowSelfHostedServerUrlChange: (value) => {
+          this.showSelfHostedServerUrl = value;
+          this.refresh();
+        },
       });
       return;
     }
